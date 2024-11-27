@@ -22,4 +22,4 @@ class Category(Base):
     __tablename__ = 'category'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(20), default='', unique=True, nullable=False)
-    emoji = Column(String(20, collation='utf8mb4_general_ci'), default='', unique=True, nullable=False)
+    emoji = Column(String(20), default='', unique=True, nullable=False)

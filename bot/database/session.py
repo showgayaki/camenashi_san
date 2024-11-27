@@ -9,7 +9,7 @@ config = load_config()
 
 # データベースエンジンの作成
 engine = create_engine(
-    'mariadb+mariadbconnector://{}:{}@{}:{}/{}?charset=utf8mb4'.format(
+    'mariadb+mariadbconnector://{}:{}@{}:{}/{}'.format(
         config.DB_HOST, config.DB_PASS, config.DB_HOST, config.DB_PORT, config.DB_NAME
     ),
     echo=True

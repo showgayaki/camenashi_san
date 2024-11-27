@@ -71,7 +71,7 @@ def run_migrations_online() -> None:
     config.set_section_option('alembic', 'DB_PORT', conf.DB_PORT)
     config.set_section_option('alembic', 'DB_NAME', conf.DB_NAME)
 
-    url = f'{config.get_main_option('sqlalchemy.url')}'
+    url = config.get_main_option('sqlalchemy.url')
     # --------
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
