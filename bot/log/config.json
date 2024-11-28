@@ -23,8 +23,15 @@
         "backupCount": 3
       }
     },
+    "loggers": {
+      "bot": {
+        "level": "INFO",
+        "handlers": ["consoleHandler", "rotatingFileHandler"],
+        "propagate": false
+      }
+    },
     "root": {
-      "level": "INFO",
-      "handlers": ["consoleHandler", "rotatingFileHandler"]
+      "level": "ERROR",
+      "handlers": ["consoleHandler"]
     }
   }

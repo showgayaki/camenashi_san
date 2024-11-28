@@ -14,6 +14,13 @@ class Category(Base):
     emoji = Column(String(20), default='', unique=True, nullable=False)
     toilet = relationship('Toilet', backref='category')
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'emoji': self.emoji,
+        }
+
 
 class Toilet(Base):
     __tablename__ = 'toilet'

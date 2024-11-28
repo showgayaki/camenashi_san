@@ -4,12 +4,13 @@ from discord.ext import commands
 
 from utils.config import load_config
 from utils.message_parser import extract_file_path
-from database.crud import create_toilet, update_toilet, read_category
+from database.crud import create_toilet, read_toilet, update_toilet, read_category
+
 
 # 設定の読み込み
 config = load_config()
 
-logger = getLogger(__name__)
+logger = getLogger('bot')
 
 
 class EventListeners(commands.Cog):
@@ -50,10 +51,23 @@ class EventListeners(commands.Cog):
         """
         リアクションが追加されたときに呼び出されるイベント。
         """
-        logger.info(reaction.emoji == ':poop:')
-        logger.info(f"Reaction added: {reaction.emoji} by {user.name}")
+        logger.info(f'Reaction added: {reaction.emoji} to message id[{reaction.message.id}] by {user.name}')
         if user.bot:
             return  # Botのリアクションは無視
+
+        # リアクションされたメッセージが、
+        # DBに登録のあるemojiか、DBに登録されたメッセージか(Webhookから通知されたものか)確認
+        category = read_category(emoji=reaction.emoji)
+
+        if category is None:
+            logger.info('Emoji NOT found in the database.')
+        else:
+            logger.info(f'category: {category.to_dict()}')
+            toilet = read_toilet(reaction.message.id)
+            if toilet is None:
+                logger.info('No record found to update.')
+            else:
+                update_toilet(toilet.message_id, category.id)
 
 
 # コグのセットアップ

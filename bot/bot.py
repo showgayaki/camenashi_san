@@ -8,7 +8,7 @@ from utils.logger import load_looger
 config = load_config()
 load_looger()
 
-logger = getLogger(__name__)
+logger = getLogger('bot')
 
 # intentsの設定 (必要な権限に応じて調整)
 intents = discord.Intents.default()

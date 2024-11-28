@@ -6,10 +6,10 @@ from .models import Toilet, Category
 from .session import get_db
 
 
-logger = getLogger(__name__)
+logger = getLogger('bot')
 
 
-def create_toilet(message_id: int, video_file_path: str) -> Toilet:
+def create_toilet(message_id: int, video_file_path: str) -> Toilet | None:
     db = next(get_db())
     now = datetime.now()
     new = Toilet(
@@ -26,10 +26,32 @@ def create_toilet(message_id: int, video_file_path: str) -> Toilet:
         db.commit()
         return new
     except SQLAlchemyError as e:
-        logger.error(e)
+        logger.error(f'SQLAlchemyError: {e}')
         db.rollback()
+    except Exception as e:
+        logger.error(f'Unknown Error: {e}')
     finally:
         db.close()
+
+    return None
+
+
+def read_toilet(message_id: int) -> Toilet | None:
+    db = next(get_db())
+    record = None
+    try:
+        logger.info('Starting read toilet record.')
+        record = db.query(Toilet).filter(Toilet.message_id == message_id).first()
+        logger.info(f'Toilet record: {record.to_dict()}')
+    except SQLAlchemyError as e:
+        logger.error(f'SQLAlchemyError: {e}')
+        db.rollback()
+    except Exception as e:
+        logger.error(f'Unknown Error: {e}')
+    finally:
+        db.close()
+
+    return record
 
 
 def update_toilet(message_id: int, category_id: int) -> None:
@@ -37,12 +59,25 @@ def update_toilet(message_id: int, category_id: int) -> None:
     try:
         logger.info('Starting update toilet record.')
         record = db.query(Toilet).filter(Toilet.message_id == message_id).first()
+        # DBに登録がなければ終了
+        if record is None:
+            logger.info('No record found to update.')
+            return
+
+        logger.info(f'before: {record.to_dict()}')
+        before = record.category_id
         record.category_id = category_id
+        record.updated_at = datetime.now()
+
         db.commit()
-        db.refresh(record)
+        logger.info(f'after: {record.to_dict()}')
+        logger.info(f'category_id changed: {before} to {record.category_id}')
+        logger.info('Toilet record updated successfully.')
     except SQLAlchemyError as e:
-        logger.error(e)
+        logger.error(f'SQLAlchemyError: {e}')
         db.rollback()
+    except Exception as e:
+        logger.error(f'Unknown Error: {e}')
     finally:
         db.close()
 
@@ -54,10 +89,10 @@ def read_category(id: int = 0, emoji: str = '') -> Category:
         logger.info('Starting read category record.')
         category = (db.query(Category).filter(Category.id == id).first()
                     if id else db.query(Category).filter(Category.emoji == emoji).first())
-        logger.info(f'category_id: {category.id}.')
-        return category
     except SQLAlchemyError as e:
-        logger.error(e)
+        logger.error(f'SQLAlchemyError: {e}')
+    except Exception as e:
+        logger.error(f'Unknown Error: {e}')
     finally:
         db.close()
 
