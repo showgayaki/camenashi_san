@@ -1,8 +1,8 @@
 """create_tables
 
-Revision ID: 072f28188c61
+Revision ID: 910dc124641b
 Revises:
-Create Date: 2024-11-27 10:29:58.945346
+Create Date: 2024-11-28 10:57:03.240488
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '072f28188c61'
+revision: str = '910dc124641b'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,7 +30,7 @@ def upgrade() -> None:
                                )
     op.create_table('toilet',
                     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-                    sa.Column('message_id', sa.Integer(), nullable=False),
+                    sa.Column('message_id', sa.BigInteger(), nullable=False),
                     sa.Column('category_id', sa.Integer(), nullable=True),
                     sa.Column('video_file_path', sa.String(length=255), nullable=False),
                     sa.Column('created_at', sa.DateTime(), nullable=False),

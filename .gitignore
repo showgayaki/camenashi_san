@@ -3,6 +3,7 @@
 .env*
 _backup/
 memo.md
+db_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

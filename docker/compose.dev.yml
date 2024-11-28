@@ -31,10 +31,10 @@ services:
     image: camenashi_db
     container_name: camenashi_db
     hostname: camenashi_db
-    # volumes:
-    #   - type: bind
-    #     source: ./db/db_data/
-    #     target: /var/lib/mysql
+    volumes:
+      - type: bind
+        source: ./camenashi_db/db_data/
+        target: /var/lib/mysql
     ports:
       - "${DB_PORT}:${DB_PORT}"
     restart: always

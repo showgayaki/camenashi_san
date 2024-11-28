@@ -10,13 +10,18 @@ config = load_config()
 # データベースエンジンの作成
 engine = create_engine(
     'mariadb+mariadbconnector://{}:{}@{}:{}/{}'.format(
-        config.DB_HOST, config.DB_PASS, config.DB_HOST, config.DB_PORT, config.DB_NAME
+        config.DB_USER, config.DB_PASS, config.DB_HOST, config.DB_PORT, config.DB_NAME
     ),
     echo=True
 )
 
 # セッションの作成
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    bind=engine,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False,
+)
 
 
 def get_db() -> Generator[Session, None, None]:
