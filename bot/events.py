@@ -26,25 +26,24 @@ class EventListeners(commands.Cog):
         """
         ユーザーがメッセージを投稿したときに呼び出されるイベント。
         """
-        logger.info('Message received.')
-        for mention in message.mentions:
-            logger.info(f'mention.id: {mention.id}')
-            # 自分(bot)へのメンションで、WebhookからのメッセージならDBに登録
-            if mention.id == config.MENTION_ID:
-                if message.author.bot:
-                    file_path = extract_file_path(message.content)
-                    logger.info(f'file_path: {file_path}')
-                    new = create_toilet(
-                        message_id=message.id,
-                        video_file_path=file_path,
-                    )
-                    logger.info(f'New Toilet record: {new.to_dict()}')
-                else:
-                    # 人間にはうんちでやんす
-                    await message.channel.send('💩')
+        logger.info(f'Message received: {message.mentions}.')
+        mention_ids = [mention.id for mention in message.mentions]
+        # 自分(bot)へのメンションで、WebhookからのメッセージならDBに登録
+        if config.MENTION_ID in mention_ids:
+            if message.author.bot:
+                file_path = extract_file_path(message.content)
+                logger.info(f'file_path: {file_path}')
+                new = create_toilet(
+                    message_id=message.id,
+                    video_file_path=file_path,
+                )
+                logger.info(f'New Toilet record: {new.to_dict()}')
             else:
-                # メンション以外は無視
-                return
+                # 人間にはうんちでやんす
+                await message.channel.send('💩')
+        else:
+            # メンション以外は無視
+            return
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
@@ -68,6 +67,10 @@ class EventListeners(commands.Cog):
                 logger.info('No record found to update.')
             else:
                 update_toilet(toilet.message_id, category.id)
+
+    @commands.Cog.listener()
+    async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.User):
+        pass
 
 
 # コグのセットアップ
