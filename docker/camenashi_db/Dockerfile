@@ -1,4 +1,4 @@
-FROM mariadb:11.4
+FROM mariadb:10.5.22
 
 RUN apt-get update -y && apt-get upgrade -y \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -15,4 +15,4 @@ ENV TZ=JST-9
 # ARG DB_PORT
 # RUN sed -i "s/\# port\s*=\s*3306/port = $DB_PORT/" /etc/mysql/my.cnf
 COPY my.cnf /etc/mysql/conf.d/
-COPY camenashi.sql /docker-entrypoint-initdb.d/
+COPY init.sql /docker-entrypoint-initdb.d/
