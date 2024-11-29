@@ -15,6 +15,7 @@ intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
 intents.reactions = True
+intents.members = True
 
 # Botの初期化
 bot = commands.Bot(command_prefix='!', intents=intents)

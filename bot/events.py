@@ -4,7 +4,8 @@ from discord.ext import commands
 
 from utils.config import load_config
 from utils.message_parser import extract_file_path
-from database.crud import create_toilet, read_toilet, update_toilet, read_category
+from database.crud.toilet import create_toilet, read_toilet, update_toilet
+from database.crud.category import read_category
 
 
 # 設定の読み込み
@@ -26,7 +27,7 @@ class EventListeners(commands.Cog):
         """
         ユーザーがメッセージを投稿したときに呼び出されるイベント。
         """
-        logger.info(f'Message received: {message.mentions}.')
+        logger.info('Message received.')
         mention_ids = [mention.id for mention in message.mentions]
         # 自分(bot)へのメンションで、WebhookからのメッセージならDBに登録
         if config.MENTION_ID in mention_ids:
@@ -46,12 +47,12 @@ class EventListeners(commands.Cog):
             return
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
+    async def on_raw_reaction_add(self, reaction: discord.RawReactionActionEvent):
         """
         リアクションが追加されたときに呼び出されるイベント。
         """
-        logger.info(f'Reaction added: {reaction.emoji} to message id[{reaction.message.id}] by {user.name}')
-        if user.bot:
+        logger.info(f'Reaction added: {reaction.emoji} to message id[{reaction.message_id}] by {reaction.member.name}')
+        if reaction.member.bot:
             return  # Botのリアクションは無視
 
         # リアクションされたメッセージが、
@@ -59,18 +60,32 @@ class EventListeners(commands.Cog):
         category = read_category(emoji=reaction.emoji)
 
         if category is None:
-            logger.info('Emoji NOT found in the database.')
+            logger.info('Reacted emoji NOT found in the database.')
         else:
             logger.info(f'category: {category.to_dict()}')
-            toilet = read_toilet(reaction.message.id)
+            toilet = read_toilet(reaction.message_id)
             if toilet is None:
                 logger.info('No record found to update.')
             else:
                 update_toilet(toilet.message_id, category.id)
 
+    # Raw
     @commands.Cog.listener()
-    async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.User):
-        pass
+    async def on_raw_reaction_remove(self, reaction: discord.RawReactionActionEvent):
+        """
+        リアクションが削除されたときに呼び出されるイベント。
+
+        ・user_nameの取得
+        reaction.memberは追加イベントのときだけなので、guild.get_member()で取る。
+        Discord Developer PortalのBotの設定で
+        Privileged Gateway Intents
+          - Server Members Intent: 有効
+        にする。
+        んでbot.pyで、intents.members = Trueする
+        """
+        guild = self.bot.get_guild(reaction.guild_id)  # サーバー情報を取得
+        user_name = 'Unknown' if guild is None else guild.get_member(reaction.user_id).name
+        logger.info(f'Reaction removed: {reaction.emoji} from message id[{reaction.message_id}] by {user_name}')
 
 
 # コグのセットアップ
