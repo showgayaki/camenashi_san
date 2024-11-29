@@ -5,6 +5,7 @@ from discord.ext import commands
 from utils.config import load_config
 from utils.logger import load_looger
 
+
 config = load_config()
 load_looger()
 

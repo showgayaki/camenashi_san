@@ -8,7 +8,7 @@ from ..session import get_db
 logger = getLogger('bot')
 
 
-def read_category(id: int = 0, emoji: str = '') -> Category:
+def read_category(id: int = 0, emoji: str = '') -> Category | None:
     db = next(get_db())
     category = None
     try:
@@ -23,3 +23,19 @@ def read_category(id: int = 0, emoji: str = '') -> Category:
         db.close()
 
     return category
+
+
+def read_category_all() -> list[Category] | None:
+    db = next(get_db())
+    categories = None
+    try:
+        logger.info('Starting read all category records.')
+        categories = db.query(Category).all()
+    except SQLAlchemyError as e:
+        logger.error(f'SQLAlchemyError: {e}')
+    except Exception as e:
+        logger.error(f'Unknown Error: {e}')
+    finally:
+        db.close()
+
+    return categories
