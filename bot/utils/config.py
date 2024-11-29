@@ -7,7 +7,7 @@ def load_config() -> SimpleNamespace:
     load_dotenv(override=True)  # .envファイルの読み込み
     cfg = {
         'DISCORD_TOKEN': os.getenv('DISCORD_TOKEN'),
-        'DISCORD_CHANNEL_ID': int(os.getenv('DISCORD_CHANNEL_ID')),
+        'DISCORD_ADMIN_CHANNEL_ID': int(os.getenv('DISCORD_ADMIN_CHANNEL_ID')),
         'MENTION_ID': int(os.getenv('MENTION_ID')),
         'DB_HOST': os.getenv('DB_HOST'),
         'DB_PORT': os.getenv('DB_PORT'),
