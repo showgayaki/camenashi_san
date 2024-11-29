@@ -21,9 +21,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 # コグのロード
 initial_extensions = [
-    'admin',
-    'events',  # イベント処理
-    # 'commands.example',  # コマンド例
+    'events',
+    'commands.admin',
 ]
 
 
