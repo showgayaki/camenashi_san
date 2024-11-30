@@ -40,7 +40,7 @@ class EventListeners(commands.Cog):
                 )
                 logger.info(f'New Toilet record: {new.to_dict()}')
                 admin_channel = self.bot.get_channel(config.DISCORD_ADMIN_CHANNEL_ID)
-                await admin_channel.send(f'新しいおトイレコードが登録されました\n{new.to_dict()}')
+                await admin_channel.send(f'新しいおトイレコード(ID: {new.id})が登録されました')
             else:
                 # 人間にはうんちでやんす
                 await message.channel.send('💩')
