@@ -8,6 +8,7 @@ def load_config() -> SimpleNamespace:
     cfg = {
         'DISCORD_TOKEN': os.getenv('DISCORD_TOKEN'),
         'DISCORD_ADMIN_CHANNEL_ID': int(os.getenv('DISCORD_ADMIN_CHANNEL_ID')),
+        'DISCORD_GUILD_ID': int(os.getenv('DISCORD_GUILD_ID')),
         'MENTION_ID': int(os.getenv('MENTION_ID')),
         'DB_HOST': os.getenv('DB_HOST'),
         'DB_PORT': os.getenv('DB_PORT'),
