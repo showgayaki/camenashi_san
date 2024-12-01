@@ -5,17 +5,19 @@ class AdminCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(name="reload", hidden=True)
+    @commands.command(name='reload', hidden=True)
     @commands.is_owner()
-    async def reload(self, ctx, extension: str):
+    async def reload(self, ctx):
         """
-        指定した拡張機能をホットリロードするコマンド
+        すべての拡張機能をホットリロードするコマンド
         """
         try:
-            await self.bot.reload_extension(extension)
-            await ctx.send(f"Reloaded extension: {extension}")
+            for extension in self.bot.extensions:
+                await self.bot.reload_extension(extension)
+
+            await ctx.send(f'Reloaded extensions: {self.bot.extensions.keys()}')
         except Exception as e:
-            await ctx.send(f"Failed to reload extension: {extension}\nError: {e}")
+            await ctx.send(f'Failed to reload extension: {extension}\nError: {e}')
 
 
 async def setup(bot):
