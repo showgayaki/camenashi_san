@@ -4,13 +4,12 @@ from discord.ext import commands
 
 from utils.config import load_config
 from utils.message_parser import extract_file_path
-from database.crud.toilet import create_toilet, read_toilet, update_toilet
+from database.crud.toilet import create_toilet, read_toilet_by_message_id, update_toilet
 from database.crud.category import read_category, read_category_all
 
 
 # 設定の読み込み
 config = load_config()
-
 logger = getLogger('bot')
 
 
@@ -20,6 +19,13 @@ class EventListeners(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        # スラッシュコマンドの同期
+        try:
+            synced = await self.bot.tree.sync(guild=discord.Object(id=config.DISCORD_GUILD_ID))
+            logger.info(f'Synced {len(synced)} command(s) successfully.')
+        except Exception as e:
+            logger.error(f'Failed to sync commands: {e}')
+
         logger.info('Cog ready.')
 
     @commands.Cog.listener()
@@ -27,7 +33,7 @@ class EventListeners(commands.Cog):
         """
         ユーザーがメッセージを投稿したときに呼び出されるイベント。
         """
-        logger.info('Message received.')
+        logger.info(f'Message received: {message.content}')
         mention_ids = [mention.id for mention in message.mentions]
         # 自分(bot)へのメンションで、WebhookからのメッセージならDBに登録
         if config.MENTION_ID in mention_ids:
@@ -38,15 +44,24 @@ class EventListeners(commands.Cog):
                     message_id=message.id,
                     video_file_path=file_path,
                 )
-                logger.info(f'New Toilet record: {new.to_dict()}')
+
                 admin_channel = self.bot.get_channel(config.DISCORD_ADMIN_CHANNEL_ID)
                 await admin_channel.send(f'新しいおトイレコード(ID: {new.id})が登録されました')
             else:
                 # 人間にはうんちでやんす
                 await message.channel.send('💩')
         else:
-            # メンション以外は無視
-            return
+            # devのときは、かめなしチャンネルには反応しない
+            if config.ENVIRONMENT == 'dev' and message.channel.id == config.NON_MONITORED_CHANNEL_ID:
+                logger.info(f'Not reply channel: {message.channel.name}(id: {message.channel.id})')
+                return
+
+            if message.content in config.KEYWORDS.__dict__.values():
+                search_records_cog = self.bot.get_cog('SearchRecords')
+                await search_records_cog.reply(message=message)
+            else:
+                # キーワードに合致しなければ無視
+                return
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, reaction: discord.RawReactionActionEvent):
@@ -65,7 +80,7 @@ class EventListeners(commands.Cog):
             logger.info('Reacted emoji NOT found in the database.')
         else:
             logger.info(f'category: {category.to_dict()}')
-            toilet = read_toilet(reaction.message_id)
+            toilet = read_toilet_by_message_id(reaction.message_id)
             if toilet is None:
                 logger.info('No record found to update.')
             else:
@@ -95,7 +110,7 @@ class EventListeners(commands.Cog):
             logger.info('Removed emoji is NOT found in the databese.')
             return
         else:
-            toilet = read_toilet(reaction.message_id)
+            toilet = read_toilet_by_message_id(reaction.message_id)
             if toilet is None:
                 # 関係ないレコードなら終了
                 logger.info('No record found to update.')
@@ -130,4 +145,4 @@ class EventListeners(commands.Cog):
 
 # コグのセットアップ
 async def setup(bot: commands.Bot):
-    await bot.add_cog(EventListeners(bot))
+    await bot.add_cog(EventListeners(bot), guild=discord.Object(id=config.DISCORD_GUILD_ID))

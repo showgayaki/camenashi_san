@@ -1,5 +1,7 @@
 from datetime import datetime
 from logging import getLogger
+from sqlalchemy import select, and_
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..models import Toilet
@@ -22,9 +24,9 @@ def create_toilet(message_id: int, video_file_path: str) -> Toilet | None:
 
     try:
         logger.info('Starting create toilet record.')
-        logger.info(f'New record: {new.to_dict()}')
         db.add(new)
         db.commit()
+        logger.info(f'New Toilet record: {new.to_dict()}')
         return new
     except SQLAlchemyError as e:
         logger.error(f'SQLAlchemyError: {e}')
@@ -52,6 +54,33 @@ def read_toilet_by_message_id(message_id: int) -> Toilet | None:
         db.close()
 
     return record
+
+
+def read_toilet_by_created_at_with_category(start: datetime, end: datetime = datetime.now()) -> list[Toilet]:
+    db = next(get_db())
+    records = []
+    try:
+        logger.info('Starting read toilet records by created_at.')
+        query = (
+            select(Toilet)
+            .options(joinedload(Toilet.category))
+            .where(
+                and_(
+                    Toilet.created_at >= start,
+                    Toilet.created_at < end,
+                )
+            )
+        )
+        records = db.execute(query).scalars().all()
+    except SQLAlchemyError as e:
+        logger.error(f'SQLAlchemyError: {e}')
+        db.rollback()
+    except Exception as e:
+        logger.error(f'Unknown Error: {e}')
+    finally:
+        db.close()
+
+    return records
 
 
 def update_toilet(message_id: int, category_id: int) -> None:

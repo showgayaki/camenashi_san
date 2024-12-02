@@ -12,7 +12,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(20), default='', unique=True, nullable=False)
     emoji = Column(String(20), default='', unique=True, nullable=False)
-    toilet = relationship('Toilet', backref='category')
+    toilet = relationship('Toilet', back_populates='category')
 
     def to_dict(self):
         return {
@@ -30,6 +30,7 @@ class Toilet(Base):
     video_file_path = Column(String(255), default='', nullable=False)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, default=datetime.now(), nullable=False)
+    category = relationship('Category', back_populates='toilet')
 
     def to_dict(self):
         return {

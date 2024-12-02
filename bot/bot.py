@@ -24,6 +24,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 # コグのロード
 initial_extensions = [
     'events',
+    'commands.search_records',
     'commands.admin',
 ]
 
@@ -33,7 +34,7 @@ async def main():
     logger.info('Loading Bot Extensions.')
     for extension in initial_extensions:
         try:
-            await bot.load_extension(extension)  # 非同期でロード
+            await bot.load_extension(extension)
         except Exception as e:
             logger.error(f'Failed to load extension {extension}. Error: {e}')
 
