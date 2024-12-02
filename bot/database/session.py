@@ -12,7 +12,9 @@ engine = create_engine(
     'mariadb+mariadbconnector://{}:{}@{}:{}/{}'.format(
         config.DB_USER, config.DB_PASS, config.DB_HOST, config.DB_PORT, config.DB_NAME
     ),
-    echo=True
+    echo=True,
+    pool_pre_ping=True,
+    pool_recycle=3600
 )
 
 # セッションの作成

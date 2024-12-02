@@ -22,6 +22,7 @@ def create_toilet(message_id: int, video_file_path: str) -> Toilet | None:
 
     try:
         logger.info('Starting create toilet record.')
+        logger.info(f'New record: {new.to_dict()}')
         db.add(new)
         db.commit()
         return new
@@ -36,11 +37,11 @@ def create_toilet(message_id: int, video_file_path: str) -> Toilet | None:
     return None
 
 
-def read_toilet(message_id: int) -> Toilet | None:
+def read_toilet_by_message_id(message_id: int) -> Toilet | None:
     db = next(get_db())
     record = None
     try:
-        logger.info('Starting read toilet record.')
+        logger.info('Starting read toilet record by message_id.')
         record = db.query(Toilet).filter(Toilet.message_id == message_id).first()
     except SQLAlchemyError as e:
         logger.error(f'SQLAlchemyError: {e}')
