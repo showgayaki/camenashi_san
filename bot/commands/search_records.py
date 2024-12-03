@@ -39,7 +39,6 @@ class SearchRecords(commands.Cog):
 
         start = self._start_datetime(term)
         # start = datetime(2024, 12, 1, 0, 0, 0)
-        logger.info(f'Start date: {start}')
 
         records = read_toilet_by_created_at_with_category(start)
         logger.info(f'Records ids: {[record.id for record in records]}')
