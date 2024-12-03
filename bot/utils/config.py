@@ -21,6 +21,8 @@ def load_config() -> SimpleNamespace:
             today='今日',
             week='今週',
             month='今月',
+            yesterday='昨日',
+            days='日前',
         ),
     }
 

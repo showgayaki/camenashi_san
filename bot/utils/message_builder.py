@@ -7,7 +7,7 @@ logger = getLogger('bot')
 
 def builder(term: str, records: list[Toilet]) -> str:
     if len(records) == 0:
-        return f'{term}はまだおトイレしていません'
+        return f'{term}はおトイレしていません'
 
     message = f'{term}のおトイレ結果です\n```'
     for record in records:

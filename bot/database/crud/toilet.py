@@ -1,5 +1,5 @@
 from logging import getLogger
-from datetime import datetime, time
+from datetime import datetime
 from sqlalchemy import select, and_
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
@@ -56,8 +56,7 @@ def read_toilet_by_message_id(message_id: int) -> Toilet | None:
     return record
 
 
-def read_toilet_by_created_at_with_category(start: datetime, end: datetime | None = None) -> list[Toilet]:
-    end = datetime.combine(datetime.now().date(), time.max) if end is None else end
+def read_toilet_by_created_at_with_category(start: datetime, end: datetime) -> list[Toilet]:
     logger.info(f'Start date: {start}')
     logger.info(f'End date: {end}')
 
