@@ -37,7 +37,7 @@ DB_NAME=camenashi  # データーベース名
 
 ## Docker実行
 @dev  
-`docker compose -f docker/compose.dev.yml up -d --build`
+`docker compose --env-file .env.dev -f docker/compose.dev.yml up -d --build`
 
 @prod  
 `docker compose -f docker/compose.yml up -d --build`  
