@@ -22,12 +22,12 @@ class SearchRecords(commands.Cog):
     async def today(self, interaction: Interaction):
         await self.reply(interaction=interaction)
 
-    @app_commands.command(name='week', description='今週のおトイレを検索します')
-    async def week(self, interaction: Interaction):
+    @app_commands.command(name='this_week', description='今週のおトイレを検索します')
+    async def this_week(self, interaction: Interaction):
         await self.reply(interaction=interaction)
 
-    @app_commands.command(name='month', description='今月のおトイレを検索します')
-    async def month(self, interaction: Interaction):
+    @app_commands.command(name='this_month', description='今月のおトイレを検索します')
+    async def this_month(self, interaction: Interaction):
         await self.reply(interaction=interaction)
 
     async def reply(self, interaction: Interaction = None, message: discord.Message = None) -> None:
@@ -60,7 +60,7 @@ class SearchRecords(commands.Cog):
     def _start_datetime(self, now: datetime, keyword: str) -> datetime:
         if keyword == config.KEYWORDS.today:
             return datetime.combine(now.date(), time.min)
-        elif keyword == config.KEYWORDS.week:
+        elif keyword == config.KEYWORDS.this_week:
             # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
             today_weekday = now.weekday()
             # 前の日曜日までの日数を計算
@@ -68,7 +68,7 @@ class SearchRecords(commands.Cog):
             last_sunday = now + timedelta(days=days_until_last_sunday)
 
             return datetime.combine(last_sunday, time.min)
-        elif keyword == config.KEYWORDS.month:
+        elif keyword == config.KEYWORDS.this_month:
             return datetime(now.year, now.month, 1)
         elif keyword == config.KEYWORDS.yesterday:
             return datetime.combine(now - timedelta(days=1), time.min)
