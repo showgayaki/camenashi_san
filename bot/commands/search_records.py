@@ -49,7 +49,13 @@ class SearchRecords(commands.Cog):
             logger.info(f'Records ids: {[record.id for record in records]}')
 
             # ⚪︎日前のときは、日にちをかっこ書きで入れておく
-            keyword = f'{keyword}（{start.strftime("%m/%d")}）' if config.KEYWORDS.days in keyword else keyword
+            if config.KEYWORDS.days in keyword:
+                keyword = f'{keyword}（{start.strftime("%m/%d")}）'
+            elif config.KEYWORDS.last_week in keyword or\
+                    config.KEYWORDS.last_month in keyword:
+                # 先週と先月の場合は期間を入れておく
+                keyword = f'{keyword}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
+
             reply = records_message(keyword, records)
 
         if interaction:
@@ -72,15 +78,38 @@ class SearchRecords(commands.Cog):
             return datetime(now.year, now.month, 1)
         elif keyword == config.KEYWORDS.yesterday:
             return datetime.combine(now - timedelta(days=1), time.min)
+        elif keyword == config.KEYWORDS.last_week:
+            # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
+            today_weekday = now.weekday()
+            # 前の日曜日までの日数を計算
+            days_until_last_sunday = 0 if (6 - today_weekday - 7) == -7 else (6 - today_weekday - 7)
+            last_sunday = now + timedelta(days=days_until_last_sunday)
+
+            # 前の日曜日のさらに1週間前が、先週の日曜日
+            return datetime.combine(last_sunday - timedelta(weeks=1), time.min)
+        elif keyword == config.KEYWORDS.last_month:
+            return datetime(now.year, now.month - 1, 1)
         elif config.KEYWORDS.days in keyword:
             days = zenkaku_to_int_days(keyword)
             return datetime.combine(now - timedelta(days=days), time.min)
 
     def _end_datetime(self, now: datetime, keyword: str) -> datetime:
-        if keyword == config.KEYWORDS.yesterday:
-            days = 1
-        elif config.KEYWORDS.days in keyword:
+        if config.KEYWORDS.days in keyword:
             days = zenkaku_to_int_days(keyword)
+        elif keyword == config.KEYWORDS.yesterday:
+            days = 1
+        elif keyword == config.KEYWORDS.last_week:
+            # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
+            today_weekday = now.weekday()
+            # 前の土曜日までの日数を計算
+            days_until_last_saturday = 0 if (5 - today_weekday - 7) == -7 else (5 - today_weekday - 7)
+            last_saturday = now + timedelta(days=days_until_last_saturday)
+
+            return datetime.combine(last_saturday, time.max)
+        elif keyword == config.KEYWORDS.last_month:
+            this_month_1st = datetime(now.year, now.month, 1)
+            # 今月の1日から一瞬戻れば先月の最終日時
+            return this_month_1st + timedelta(microseconds=-1)
         else:
             return now
 
