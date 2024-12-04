@@ -18,6 +18,7 @@ def load_config() -> SimpleNamespace:
         'DB_PASS': os.getenv('DB_PASS'),
         'DB_NAME': os.getenv('DB_NAME'),
         'KEYWORDS': SimpleNamespace(
+            keyword='キーワード',
             today='今日',
             week='今週',
             month='今月',
