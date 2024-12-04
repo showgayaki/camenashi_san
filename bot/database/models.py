@@ -9,7 +9,7 @@ Base = declarative_base()
 
 class Category(Base):
     __tablename__ = 'category'
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=False, unique=True)
     name = Column(String(20), default='', unique=True, nullable=False)
     emoji = Column(String(20), default='', unique=True, nullable=False)
     toilet = relationship('Toilet', back_populates='category')

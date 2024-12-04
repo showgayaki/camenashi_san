@@ -1,4 +1,4 @@
-from utils.config_loader import load_config
+from .config_loader import load_config
 
 
 class ConfigManager:
