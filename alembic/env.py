@@ -5,12 +5,12 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from bot.utils.config import load_config
+from bot.utils.config_manager import ConfigManager
 from bot.database.models import Base
 
 
 # 設定の読み込み
-conf = load_config()
+conf = ConfigManager().config
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

@@ -3,14 +3,14 @@ import re
 import discord
 from discord.ext import commands
 
-from utils.config import load_config
+from utils.config_manager import ConfigManager
 from utils.message_parser import extract_file_path
 from database.crud.toilet import create_toilet, read_toilet_by_message_id, update_toilet
 from database.crud.category import read_category, read_category_all
 
 
 # 設定の読み込み
-config = load_config()
+config = ConfigManager().config
 logger = getLogger('bot')
 
 

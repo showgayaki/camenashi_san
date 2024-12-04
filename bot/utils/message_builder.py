@@ -1,10 +1,10 @@
 from logging import getLogger
 
-from utils.config import load_config
+from utils.config_manager import ConfigManager
 from database.models import Toilet
 
 
-config = load_config()
+config = ConfigManager().config
 logger = getLogger('bot')
 
 

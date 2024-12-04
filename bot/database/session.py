@@ -2,10 +2,10 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from utils.config import load_config
+from utils.config_manager import ConfigManager
 
 # 設定の読み込み
-config = load_config()
+config = ConfigManager().config
 
 # データベースエンジンの作成
 engine = create_engine(

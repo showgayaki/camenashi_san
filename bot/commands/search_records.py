@@ -4,13 +4,13 @@ import discord
 from discord import app_commands, Interaction
 from discord.ext import commands
 
-from utils.config import load_config
+from utils.config_manager import ConfigManager
 from utils.message_builder import keywords_message, records_message
 from utils.message_parser import zenkaku_to_int_days
 from database.crud.toilet import read_toilet_by_created_at_with_category
 
 
-config = load_config()
+config = ConfigManager().config
 logger = getLogger('bot')
 
 

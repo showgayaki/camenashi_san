@@ -4,10 +4,10 @@ import importlib
 import discord
 from discord.ext import commands
 
-from utils.config import load_config
+from utils.config_manager import ConfigManager
 
 # 設定の読み込み
-config = load_config()
+config = ConfigManager().config
 logger = getLogger('bot')
 
 

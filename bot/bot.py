@@ -2,11 +2,11 @@ from logging import getLogger
 import discord
 from discord.ext import commands
 
-from utils.config import load_config
+from utils.config_manager import ConfigManager
 from utils.logger import load_looger
 
 
-config = load_config()
+config = ConfigManager().config
 load_looger()
 
 logger = getLogger('bot')
