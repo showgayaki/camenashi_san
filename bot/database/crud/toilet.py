@@ -76,7 +76,7 @@ def read_toilet_by_created_at_with_category(start: datetime, end: datetime) -> l
                 and_(
                     Toilet.created_at >= start,
                     Toilet.created_at < end,
-                    Category.include_in_summary == True,
+                    Category.include_in_summary == True,  # noqa: E712
                 )
             )
             .order_by(Toilet.created_at)

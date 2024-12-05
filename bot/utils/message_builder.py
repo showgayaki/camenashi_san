@@ -25,3 +25,7 @@ def records_message(term: str, records: list[Toilet]) -> str:
         message += f'{record.created_at.strftime('%Y/%m/%d %H:%M:%S')}: {record.category.name}\n'
 
     return f'{message}```'
+
+
+def parrot_reply(message: str) -> str:
+    return message.translate(str.maketrans('?？!！', '！！！！'))
