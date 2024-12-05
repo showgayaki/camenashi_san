@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, BigInteger, String, DateTime, ForeignKey
+from sqlalchemy import Column, Boolean, Integer, BigInteger, String, DateTime, ForeignKey, text
 from sqlalchemy.orm import relationship
 
 
@@ -12,6 +12,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True, autoincrement=False, unique=True)
     name = Column(String(20), default='', unique=True, nullable=False)
     emoji = Column(String(20), default='', unique=True, nullable=False)
+    include_in_summary = Column(Boolean, default=True, server_default=text('True'), nullable=False)
     toilet = relationship('Toilet', back_populates='category')
 
     def to_dict(self):
@@ -19,6 +20,7 @@ class Category(Base):
             'id': self.id,
             'name': self.name,
             'emoji': self.emoji,
+            'include_in_summary': self.include_in_summary,
         }
 
 
