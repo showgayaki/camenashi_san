@@ -5,7 +5,7 @@ from discord import app_commands, Interaction
 from discord.ext import commands
 
 from utils.config_manager import ConfigManager
-from utils.message_builder import keywords_message, records_message
+from utils.reply_builder import keywords_reply, records_reply
 from utils.message_parser import zenkaku_to_int_days
 from database.crud.toilet import read_toilet_by_created_at_with_category
 
@@ -39,7 +39,7 @@ class SearchRecords(commands.Cog):
             keyword = message.content
 
         if message.content == config.KEYWORDS.keyword:
-            reply = keywords_message(config.KEYWORDS.__dict__.values())
+            reply = keywords_reply(config.KEYWORDS.__dict__.values())
         else:
             now = datetime.now()
             start = self._start_datetime(now, keyword)
@@ -56,7 +56,7 @@ class SearchRecords(commands.Cog):
                 # 先週と先月の場合は期間を入れておく
                 keyword = f'{keyword}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
 
-            reply = records_message(keyword, records)
+            reply = records_reply(keyword, records)
 
         if interaction:
             await interaction.response.send_message(reply)

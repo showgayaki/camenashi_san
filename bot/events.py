@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from utils.config_manager import ConfigManager
 from utils.message_parser import extract_file_path
-from utils.message_builder import parrot_reply
+from utils.reply_builder import parrot_reply
 from database.crud.toilet import create_toilet, read_toilet_by_message_id, update_toilet
 from database.crud.category import read_category, read_category_all
 
@@ -67,9 +67,11 @@ class EventListeners(commands.Cog):
                 # Botの投稿なら無視
                 if message.author.bot:
                     return
-                else:
-                    # ユーザーからの投稿なら元気にオウム返し
+                elif '?' in message.content or '？' in message.content:
+                    # ユーザーからの質問なら元気にオウム返し
                     await message.channel.send(parrot_reply(message.content))
+                else:
+                    return
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, reaction: discord.RawReactionActionEvent):

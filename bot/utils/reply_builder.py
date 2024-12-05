@@ -8,7 +8,7 @@ config = ConfigManager().config
 logger = getLogger('bot')
 
 
-def keywords_message(keywords: list) -> str:
+def keywords_reply(keywords: list) -> str:
     message = '反応できるキーワードは以下でやんす\n```'
     for k in keywords:
         message += f'⚪︎{k}\n' if k == config.KEYWORDS.days else f'{k}\n'
@@ -16,7 +16,7 @@ def keywords_message(keywords: list) -> str:
     return f'{message}```'
 
 
-def records_message(term: str, records: list[Toilet]) -> str:
+def records_reply(term: str, records: list[Toilet]) -> str:
     if len(records) == 0:
         return f'{term}はおトイレしていません'
 
@@ -28,4 +28,4 @@ def records_message(term: str, records: list[Toilet]) -> str:
 
 
 def parrot_reply(message: str) -> str:
-    return message.translate(str.maketrans('?？!！', '！！！！'))
+    return message.translate(str.maketrans('?？', '！！'))
