@@ -20,7 +20,7 @@ def records_message(term: str, records: list[Toilet]) -> str:
     if len(records) == 0:
         return f'{term}はおトイレしていません'
 
-    message = f'{term}のおトイレ結果です\n```'
+    message = f'{term}のおトイレ結果です\n```\n'
     for record in records:
         message += f'{record.created_at.strftime('%Y/%m/%d %H:%M:%S')}: {record.category.name}\n'
 

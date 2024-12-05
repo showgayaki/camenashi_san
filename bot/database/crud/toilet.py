@@ -4,7 +4,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
 
-from ..models import Toilet
+from ..models import Category, Toilet
 from ..session import get_db
 
 
@@ -65,16 +65,23 @@ def read_toilet_by_created_at_with_category(start: datetime, end: datetime) -> l
 
     try:
         logger.info('Starting read toilet records by created_at.')
+        # Category.include_in_summary == Trueの「==」部分で、
+        # comparison to True should be 'if cond is True:' or 'if cond:'Flake8(E712)
+        # のエラーが出るが、WHERE句に相当する箇所なので「==」じゃないといけない(「is」じゃダメ)
         query = (
             select(Toilet)
+            .join(Category, Toilet.category_id == Category.id)
             .options(joinedload(Toilet.category))
             .where(
                 and_(
                     Toilet.created_at >= start,
                     Toilet.created_at < end,
+                    Category.include_in_summary == True,
                 )
             )
+            .order_by(Toilet.created_at)
         )
+
         records = db.execute(query).scalars().all()
     except SQLAlchemyError as e:
         logger.error(f'SQLAlchemyError: {e}')
