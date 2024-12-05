@@ -1,11 +1,15 @@
 from logging import getLogger
 
 from utils.config_manager import ConfigManager
-from database.models import Toilet
+from database.models import Toilet, Category
 
 
 config = ConfigManager().config
 logger = getLogger('bot')
+
+
+def parrot_reply(message: str) -> str:
+    return message.translate(str.maketrans('?？', '！！'))
 
 
 def keywords_reply(keywords: list) -> str:
@@ -27,5 +31,15 @@ def records_reply(term: str, records: list[Toilet]) -> str:
     return f'{message}```'
 
 
-def parrot_reply(message: str) -> str:
-    return message.translate(str.maketrans('?？', '！！'))
+def category_update_reply(id_before: int, id_after: int, categories: list[Category]) -> str:
+    logger.info(f'len(categories): {len(categories)}')
+    if id_before and id_after:
+        emoji_before = 'ノーリアクション' if id_before == 1\
+            else ''.join([cat.emoji for cat in categories if cat.id == id_before])
+
+        emoji_after = 'ノーリアクション' if id_after == 1\
+            else ''.join([cat.emoji for cat in categories if cat.id == id_after])
+
+        return f'おトイレの種別が「{emoji_before}」から「{emoji_after}」に変更されたでやんす'
+    else:
+        return 'おトイレの種別の変更に失敗したでやんす'

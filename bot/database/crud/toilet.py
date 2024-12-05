@@ -94,7 +94,7 @@ def read_toilet_by_created_at_with_category(start: datetime, end: datetime) -> l
     return records
 
 
-def update_toilet(message_id: int, category_id: int) -> None:
+def update_toilet(message_id: int, category_id: int) -> tuple[int, int]:
     db = next(get_db())
     try:
         logger.info('Starting update toilet record.')
@@ -108,11 +108,13 @@ def update_toilet(message_id: int, category_id: int) -> None:
         before = record.category_id
         record.category_id = category_id
         record.updated_at = datetime.now()
-
         db.commit()
+
+        after = record.category_id
         logger.info(f'after: {record.to_dict()}')
-        logger.info(f'category_id changed: {before} to {record.category_id}')
+        logger.info(f'category_id changed: {before} to {after}')
         logger.info('Toilet record updated successfully.')
+        return before, after
     except SQLAlchemyError as e:
         logger.error(f'SQLAlchemyError: {e}')
         db.rollback()
@@ -120,3 +122,5 @@ def update_toilet(message_id: int, category_id: int) -> None:
         logger.error(f'Unknown Error: {e}')
     finally:
         db.close()
+
+    return 0, 0
