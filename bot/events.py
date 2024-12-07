@@ -94,33 +94,35 @@ class EventListeners(commands.Cog):
 
             if category is None:
                 logger.info('Reacted emoji NOT found in the database.')
+                # DBに登録のないemojiの場合は、集計対象から外すcategoryを付与する
+                category = read_category(include_in_summary=False)
             else:
                 logger.info(f'Reacted emoji: {category.to_dict()}')
 
-                # DBに登録されているメッセージに、DBに登録されているemojiがリアクションされたら
-                # スレッドを開始して返信する
-                guild = self.bot.get_guild(reaction.guild_id)
-                channel = guild.get_channel(reaction.channel_id)
-                try:
-                    message = await channel.fetch_message(reaction.message_id)
-                except Exception as e:
-                    logger.error(f'Error occurred: {e}')
-                    return
+            # DBに登録されているメッセージに、DBに登録されているemojiがリアクションされたら
+            # スレッドを開始して返信する
+            guild = self.bot.get_guild(reaction.guild_id)
+            channel = guild.get_channel(reaction.channel_id)
+            try:
+                message = await channel.fetch_message(reaction.message_id)
+            except Exception as e:
+                logger.error(f'Error occurred: {e}')
+                return
 
-                if message.thread:
-                    # 既存のスレッドがある場合
-                    thread = message.thread
-                else:
-                    # スレッドがない場合、新しいスレッドを作成
-                    thread = await message.create_thread(
-                        name=f'スッドレ {toilet.video_file_path.split('/')[-1]}',
-                        auto_archive_duration=1440,  # アーカイブまでの時間（分単位で設定）
-                    )
+            if message.thread:
+                # 既存のスレッドがある場合
+                thread = message.thread
+            else:
+                # スレッドがない場合、新しいスレッドを作成
+                thread = await message.create_thread(
+                    name=f'スッドレ {toilet.video_file_path.split('/')[-1]}',
+                    auto_archive_duration=1440,  # アーカイブまでの時間（分単位で設定）
+                )
 
-                # category_idを更新
-                id_before, id_after = update_toilet(toilet.message_id, category.id)
-                reply = category_update_reply(id_before, id_after, read_category_all())
-                await thread.send(reply)
+            # category_idを更新
+            id_before, id_after = update_toilet(toilet.message_id, category.id)
+            reply = category_update_reply(id_before, id_after, read_category_all())
+            await thread.send(reply)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, reaction: discord.RawReactionActionEvent):
@@ -146,58 +148,57 @@ class EventListeners(commands.Cog):
             logger.info('No record found to update.')
             return
         else:
-            # removeされたemojiがDBに登録されているか
-            category = read_category(emoji=reaction.emoji)
-            if category is None:
-                # 関係ないemojiなら終了
-                logger.info('Removed emoji is NOT found in the databese.')
+            channel = self.bot.get_channel(reaction.channel_id)
+            reactions = []
+            try:
+                # すでに付けられているリアクションを取るために、メッセージ取得
+                message = await channel.fetch_message(reaction.message_id)
+            except Exception as e:
+                logger.error(f'Error occurred: {e}')
+                return
+
+            if message.thread:
+                # 既存のスレッドがある場合
+                thread = message.thread
+            else:
+                # スレッドがない場合、新しいスレッドを作成
+                thread = await message.create_thread(
+                    # name=f"Thread for message {message.id}",
+                    auto_archive_duration=1440,  # アーカイブまでの時間（分単位で設定）
+                )
+
+            # メッセージについているリアクションのリスト
+            reactions = [r.emoji for r in message.reactions]
+            logger.info(f'reactions: {reactions}')
+            # カテゴリー取得
+            categories = read_category_all()
+            # emojiのリスト(ノーリアクションとノー集計は除くので[2:]にしておく)
+            category_emojis = [cat.emoji for cat in categories][2:]
+            # すでにリアクションされているemojiのうち、DBに登録されているものを抜き出す
+            reacted_emojis_in_db = [emoji for emoji in reactions if emoji in category_emojis]
+            logger.info(f'reacted_emojis_in_db: {reacted_emojis_in_db}')
+
+            # emojiが０個になったら、ノーリアクション(id:1)に戻す
+            if len(reacted_emojis_in_db) == 0:
+                reacted_category_id = 1
+            elif len(reacted_emojis_in_db) == 1:
+                # 1個だけになったら、そのemoji(category)でレコード更新
+                reacted_category_id = read_category(emoji=reacted_emojis_in_db[0]).id
+            else:
+                await thread.send('リアクションするならどれか１つにしてくれでやんす\n'
+                                  f'とりあえず後につけられた方({reacted_emojis_in_db[-1]})で更新しておくでやんす')
+                reacted_category_id = read_category(emoji=reacted_emojis_in_db[-1]).id
+
+            # category_idに変化なしなら更新しない
+            logger.info(f'reacted_category_id == toilet.category_id: {reacted_category_id == toilet.category_id}')
+            if reacted_category_id == toilet.category_id:
+                logger.info(f'No update required for the record(id: {toilet.id}).')
                 return
             else:
-                channel = self.bot.get_channel(reaction.channel_id)
-                reactions = []
-                try:
-                    # すでに付けられているリアクションを取るために、メッセージ取得
-                    message = await channel.fetch_message(reaction.message_id)
-                except Exception as e:
-                    logger.error(f'Error occurred: {e}')
-                    return
+                id_before, id_after = update_toilet(reaction.message_id, reacted_category_id)
 
-                if message.thread:
-                    # 既存のスレッドがある場合
-                    thread = message.thread
-                else:
-                    # スレッドがない場合、新しいスレッドを作成
-                    thread = await message.create_thread(
-                        # name=f"Thread for message {message.id}",
-                        auto_archive_duration=1440,  # アーカイブまでの時間（分単位で設定）
-                    )
-
-                # メッセージについているリアクションのリスト
-                reactions = [r.emoji for r in message.reactions]
-                logger.info(f'reactions: {reactions}')
-                # カテゴリー取得
-                categories = read_category_all()
-                # emojiのリスト(ノーリアクションは除くので[1:]にしておく)
-                category_emojis = [cat.emoji for cat in categories]
-                # すでにリアクションされているemojiのうち、DBに登録されているものを抜き出す
-                reacted_emojis_in_db = [emoji for emoji in category_emojis[1:] if emoji in reactions]
-                logger.info(f'reacted_emojis_in_db: {reacted_emojis_in_db}')
-
-                # emojiが０個になったら、ノーリアクション(id:1)に戻す
-                if len(reacted_emojis_in_db) == 0:
-                    id_before, id_after = update_toilet(reaction.message_id, 1)
-
-                    reply = category_update_reply(id_before, id_after, categories)
-                    await thread.send(reply)
-                elif len(reacted_emojis_in_db) == 1:
-                    # 1個だけになったら、そのemoji(category)でレコード更新
-                    reacted_category_id = read_category(emoji=reacted_emojis_in_db[0]).id
-                    id_before, id_after = update_toilet(reaction.message_id, reacted_category_id)
-
-                    reply = category_update_reply(id_before, id_after, categories)
-                    await thread.send(reply)
-                else:
-                    message.reply('リアクションするならのどれかひとつにしてくれでやんす')
+            reply = category_update_reply(id_before, id_after, categories)
+            await thread.send(reply)
 
 
 # コグのセットアップ

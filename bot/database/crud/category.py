@@ -8,13 +8,18 @@ from ..session import get_db
 logger = getLogger('bot')
 
 
-def read_category(id: int = 0, emoji: str = '') -> Category | None:
+def read_category(id: int = 0, emoji: str = '', include_in_summary: bool = True) -> Category | None:
     db = next(get_db())
     category = None
     try:
         logger.info('Starting read category record.')
-        category = (db.query(Category).filter(Category.id == id).first()
-                    if id else db.query(Category).filter(Category.emoji == emoji).first())
+
+        if id:
+            category = db.query(Category).filter(Category.id == id).first()
+        elif emoji:
+            category = db.query(Category).filter(Category.emoji == emoji).first()
+        elif not include_in_summary:
+            category = db.query(Category).filter(Category.include_in_summary == False).first()  # noqa: E712
     except SQLAlchemyError as e:
         logger.error(f'SQLAlchemyError: {e}')
     except Exception as e:
