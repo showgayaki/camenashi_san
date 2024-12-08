@@ -43,20 +43,25 @@ class SearchRecords(commands.Cog):
         else:
             now = datetime.now()
             start = self._start_datetime(now, keyword)
+            logger.info(f'start: {start}')
             end = self._end_datetime(now, keyword)
 
             records = read_toilet_by_created_at_with_category(start, end)
             logger.info(f'Records ids: {[record.id for record in records]}')
 
-            # ⚪︎日前のときは、日にちをかっこ書きで入れておく
-            if config.KEYWORDS.days in keyword:
-                keyword = f'{keyword}（{start.strftime("%m/%d")}）'
-            elif config.KEYWORDS.last_week in keyword or\
-                    config.KEYWORDS.last_month in keyword:
+            # ⚪︎日前と昨日・一昨日のときは、日にちをかっこ書きで入れておく
+            if config.KEYWORDS.days in keyword or\
+                    keyword == config.KEYWORDS.yesterday or\
+                    keyword == config.KEYWORDS.day_before_yesterday:
+                term = f'{keyword}（{start.strftime("%m/%d")}）'
+            elif keyword == config.KEYWORDS.last_week or\
+                    keyword == config.KEYWORDS.last_month:
                 # 先週と先月の場合は期間を入れておく
-                keyword = f'{keyword}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
+                term = f'{keyword}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
+            else:
+                term = keyword
 
-            reply = records_reply(keyword, records)
+            reply = records_reply(term, records)
 
         if interaction:
             await interaction.response.send_message(reply)
@@ -78,6 +83,8 @@ class SearchRecords(commands.Cog):
             return datetime(now.year, now.month, 1)
         elif keyword == config.KEYWORDS.yesterday:
             return datetime.combine(now - timedelta(days=1), time.min)
+        elif keyword == config.KEYWORDS.day_before_yesterday:
+            return datetime.combine(now - timedelta(days=2), time.min)
         elif keyword == config.KEYWORDS.last_week:
             # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
             today_weekday = now.weekday()
@@ -98,6 +105,8 @@ class SearchRecords(commands.Cog):
             days = zenkaku_to_int_days(keyword)
         elif keyword == config.KEYWORDS.yesterday:
             days = 1
+        elif keyword == config.KEYWORDS.day_before_yesterday:
+            days = 2
         elif keyword == config.KEYWORDS.last_week:
             # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
             today_weekday = now.weekday()

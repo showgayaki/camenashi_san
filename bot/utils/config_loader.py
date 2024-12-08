@@ -23,6 +23,7 @@ def load_config() -> SimpleNamespace:
             this_week='今週',
             this_month='今月',
             yesterday='昨日',
+            day_before_yesterday='一昨日',
             last_week='先週',
             last_month='先月',
             days='日前',
