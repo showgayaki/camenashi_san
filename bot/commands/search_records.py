@@ -1,12 +1,12 @@
 from logging import getLogger
-from datetime import datetime, time, timedelta
+from datetime import datetime
 import discord
 from discord import app_commands, Interaction
 from discord.ext import commands
 
 from utils.config_manager import ConfigManager
 from utils.reply_builder import keywords_reply, records_reply
-from utils.message_parser import zenkaku_to_int_days
+from utils.message_parser import zenkaku_to_int_days, start_datetime, end_datetime
 from database.crud.toilet import read_toilet_by_created_at_with_category
 
 
@@ -40,89 +40,29 @@ class SearchRecords(commands.Cog):
 
         if message.content == config.KEYWORDS.keyword:
             reply = keywords_reply(config.KEYWORDS.__dict__.values())
+        elif keyword.endswith(config.KEYWORDS.days):  # ⚪︎日前の処理
+            days = zenkaku_to_int_days(keyword)
+            if isinstance(days, int):
+                now = datetime.now()
+                start = start_datetime(now, keyword)
+                end = end_datetime(now, keyword)
+
+                records = read_toilet_by_created_at_with_category(start, end)
+                reply = records_reply(keyword, start, end, records)
+            else:
+                reply = days
         else:
             now = datetime.now()
-            start = self._start_datetime(now, keyword)
-            logger.info(f'start: {start}')
-            end = self._end_datetime(now, keyword)
+            start = start_datetime(now, keyword)
+            end = end_datetime(now, keyword)
 
             records = read_toilet_by_created_at_with_category(start, end)
-            logger.info(f'Records ids: {[record.id for record in records]}')
-
-            # ⚪︎日前と昨日・一昨日のときは、日にちをかっこ書きで入れておく
-            if config.KEYWORDS.days in keyword or\
-                    keyword == config.KEYWORDS.yesterday or\
-                    keyword == config.KEYWORDS.day_before_yesterday:
-                term = f'{keyword}（{start.strftime("%m/%d")}）'
-            elif keyword == config.KEYWORDS.last_week or\
-                    keyword == config.KEYWORDS.last_month:
-                # 先週と先月の場合は期間を入れておく
-                term = f'{keyword}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
-            else:
-                term = keyword
-
-            reply = records_reply(term, records)
+            reply = records_reply(keyword, start, end, records)
 
         if interaction:
             await interaction.response.send_message(reply)
         elif message:
             await message.channel.send(reply)
-
-    def _start_datetime(self, now: datetime, keyword: str) -> datetime:
-        if keyword == config.KEYWORDS.today:
-            return datetime.combine(now.date(), time.min)
-        elif keyword == config.KEYWORDS.this_week:
-            # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
-            today_weekday = now.weekday()
-            # 前の日曜日までの日数を計算
-            days_until_last_sunday = 0 if (6 - today_weekday - 7) == -7 else (6 - today_weekday - 7)
-            last_sunday = now + timedelta(days=days_until_last_sunday)
-
-            return datetime.combine(last_sunday, time.min)
-        elif keyword == config.KEYWORDS.this_month:
-            return datetime(now.year, now.month, 1)
-        elif keyword == config.KEYWORDS.yesterday:
-            return datetime.combine(now - timedelta(days=1), time.min)
-        elif keyword == config.KEYWORDS.day_before_yesterday:
-            return datetime.combine(now - timedelta(days=2), time.min)
-        elif keyword == config.KEYWORDS.last_week:
-            # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
-            today_weekday = now.weekday()
-            # 前の日曜日までの日数を計算
-            days_until_last_sunday = 0 if (6 - today_weekday - 7) == -7 else (6 - today_weekday - 7)
-            last_sunday = now + timedelta(days=days_until_last_sunday)
-
-            # 前の日曜日のさらに1週間前が、先週の日曜日
-            return datetime.combine(last_sunday - timedelta(weeks=1), time.min)
-        elif keyword == config.KEYWORDS.last_month:
-            return datetime(now.year, now.month - 1, 1)
-        elif config.KEYWORDS.days in keyword:
-            days = zenkaku_to_int_days(keyword)
-            return datetime.combine(now - timedelta(days=days), time.min)
-
-    def _end_datetime(self, now: datetime, keyword: str) -> datetime:
-        if config.KEYWORDS.days in keyword:
-            days = zenkaku_to_int_days(keyword)
-        elif keyword == config.KEYWORDS.yesterday:
-            days = 1
-        elif keyword == config.KEYWORDS.day_before_yesterday:
-            days = 2
-        elif keyword == config.KEYWORDS.last_week:
-            # 今日が何曜日かを取得 (月曜日=0, 日曜日=6)
-            today_weekday = now.weekday()
-            # 前の土曜日までの日数を計算
-            days_until_last_saturday = 0 if (5 - today_weekday - 7) == -7 else (5 - today_weekday - 7)
-            last_saturday = now + timedelta(days=days_until_last_saturday)
-
-            return datetime.combine(last_saturday, time.max)
-        elif keyword == config.KEYWORDS.last_month:
-            this_month_1st = datetime(now.year, now.month, 1)
-            # 今月の1日から一瞬戻れば先月の最終日時
-            return this_month_1st + timedelta(microseconds=-1)
-        else:
-            return now
-
-        return datetime.combine(now - timedelta(days=days), time.max)
 
 
 async def setup(bot: commands.Bot):

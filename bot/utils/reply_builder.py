@@ -1,4 +1,5 @@
 from logging import getLogger
+from datetime import datetime
 
 from utils.config_manager import ConfigManager
 from database.models import Toilet, Category
@@ -20,9 +21,21 @@ def keywords_reply(keywords: list) -> str:
     return f'{message}```'
 
 
-def records_reply(term: str, records: list[Toilet]) -> str:
+def records_reply(term: str, start: datetime, end: datetime, records: list[Toilet]) -> str:
     if len(records) == 0:
         return f'{term}はおトイレしていません'
+
+    # ⚪︎日前と昨日・一昨日のときは、日にちをかっこ書きで入れておく
+    if config.KEYWORDS.days in term or\
+            term == config.KEYWORDS.yesterday or\
+            term == config.KEYWORDS.day_before_yesterday:
+        term = f'{term}（{start.strftime("%m/%d")}）'
+    elif term == config.KEYWORDS.last_week or\
+            term == config.KEYWORDS.last_month:
+        # 先週と先月の場合は期間を入れておく
+        term = f'{term}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
+    else:
+        term = term
 
     total = {}
     results = '```\n'

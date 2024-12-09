@@ -1,5 +1,4 @@
 from logging import getLogger
-import re
 import discord
 from discord.ext import commands
 
@@ -60,7 +59,7 @@ class EventListeners(commands.Cog):
 
             # キーワードに合致するか、「⚪︎日前」ならDBからレコードを検索してリプライする
             if message.content in config.KEYWORDS.__dict__.values() or\
-                    bool(re.fullmatch(fr'[０-９0-9]+{config.KEYWORDS.days}', message.content)):
+                    message.content.endswith(config.KEYWORDS.days):
                 search_records_cog = self.bot.get_cog('SearchRecords')
                 await search_records_cog.reply(message=message)
             else:  # キーワードに合致せず
