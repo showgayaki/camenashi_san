@@ -16,7 +16,12 @@ def extract_file_path(message: str) -> str:
 
 def zenkaku_to_int_days(zenkaku_str: str):
     zenkaku_number = zenkaku_str.replace(config.KEYWORDS.days, '')
-    days_str = zenkaku_number.translate(str.maketrans('０１２３４５６７８９', '0123456789'))
+    days_str = zenkaku_number.translate(
+        str.maketrans(
+            '０１２３４５６７８９一二三四五六七八九',
+            '0123456789123456789'
+        )
+    )
     try:
         return int(days_str)
     except Exception as e:

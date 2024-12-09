@@ -10,13 +10,14 @@ logger = getLogger('bot')
 
 
 def parrot_reply(message: str) -> str:
-    return message.translate(str.maketrans('?？', '！！'))
+    return (message.translate(str.maketrans('?？', '！！'))
+            .replace('か', '').replace('なの', '').replace('でしょう', ''))
 
 
 def keywords_reply(keywords: list) -> str:
     message = '反応できるキーワードは以下でやんす\n```'
     for k in keywords:
-        message += f'⚪︎{k}\n' if k == config.KEYWORDS.days else f'{k}\n'
+        message += f'⚪︎{k}(一〜九の漢数字もいけるでやんす)\n' if k == config.KEYWORDS.days else f'{k}\n'
 
     return f'{message}```'
 
