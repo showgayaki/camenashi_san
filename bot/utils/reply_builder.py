@@ -35,8 +35,6 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
             term == config.KEYWORDS.last_month:
         # 先週と先月の場合は期間を入れておく
         term = f'{term}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
-    else:
-        term = term
 
     total = {}
     results = '```\n'

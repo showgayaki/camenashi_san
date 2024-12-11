@@ -20,15 +20,18 @@ class SearchRecords(commands.Cog):
 
     @app_commands.command(name='today', description='今日のおトイレを検索します')
     async def today(self, interaction: Interaction):
-        await self.reply(interaction=interaction)
+        reply = await self.reply(interaction=interaction)
+        await interaction.response.send_message(reply)
 
     @app_commands.command(name='this_week', description='今週のおトイレを検索します')
     async def this_week(self, interaction: Interaction):
-        await self.reply(interaction=interaction)
+        reply = await self.reply(interaction=interaction)
+        await interaction.response.send_message(reply)
 
     @app_commands.command(name='this_month', description='今月のおトイレを検索します')
     async def this_month(self, interaction: Interaction):
-        await self.reply(interaction=interaction)
+        reply = await self.reply(interaction=interaction)
+        await interaction.response.send_message(reply)
 
     async def reply(self, interaction: Interaction = None, message: discord.Message = None) -> None:
         # interactionがNoneじゃなければスラッシュコマンド
@@ -38,7 +41,7 @@ class SearchRecords(commands.Cog):
         else:
             keyword = message.content
 
-        if message.content == config.KEYWORDS.keyword:
+        if message is not None and message.content == config.KEYWORDS.keyword:
             reply = keywords_reply(config.KEYWORDS.__dict__.values())
         elif keyword.endswith(config.KEYWORDS.days):  # ⚪︎日前の処理
             days = zenkaku_to_int_days(keyword)
@@ -59,10 +62,7 @@ class SearchRecords(commands.Cog):
             records = read_toilet_by_created_at_with_category(start, end)
             reply = records_reply(keyword, start, end, records)
 
-        if interaction:
-            await interaction.response.send_message(reply)
-        elif message:
-            await message.channel.send(reply)
+        return reply
 
 
 async def setup(bot: commands.Bot):

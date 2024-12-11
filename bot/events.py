@@ -34,7 +34,7 @@ class EventListeners(commands.Cog):
         """
         ユーザーがメッセージを投稿したときに呼び出されるイベント。
         """
-        logger.info(f'Message received: {message.content}')
+        logger.info(f'Message received from {message.author.name}: {message.content}')
         mention_ids = [mention.id for mention in message.mentions]
         # 自分(bot)へのメンションで、WebhookからのメッセージならDBに登録
         if config.MENTION_ID in mention_ids:
@@ -61,7 +61,8 @@ class EventListeners(commands.Cog):
             if message.content in config.KEYWORDS.__dict__.values() or\
                     message.content.endswith(config.KEYWORDS.days):
                 search_records_cog = self.bot.get_cog('SearchRecords')
-                await search_records_cog.reply(message=message)
+                reply = await search_records_cog.reply(message=message)
+                await message.channel.send(reply)
             else:  # キーワードに合致せず
                 # Botの投稿なら無視
                 if message.author.bot:
