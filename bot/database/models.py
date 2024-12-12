@@ -27,10 +27,10 @@ class Category(Base):
 class Toilet(Base):
     __tablename__ = 'toilet'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    message_id = Column(BigInteger, default=0, unique=True, nullable=False)
     category_id = Column(Integer, ForeignKey('category.id'))
+    message_id = Column(BigInteger, default=0, unique=True, nullable=False)
+    message_url = Column(String(255), nullable=True)
     video_file_path = Column(String(255), default='', nullable=False)
-    url = Column(String(255), nullable=True)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, default=datetime.now(), nullable=False)
     category = relationship('Category', back_populates='toilet')
@@ -38,10 +38,10 @@ class Toilet(Base):
     def to_dict(self):
         return {
             'id': self.id,
-            'message_id': self.message_id,
             'category_id': self.category_id,
+            'message_id': self.message_id,
+            'message_url': self.message_url,
             'video_file_path': self.video_file_path,
-            'url': self.url,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
         }
