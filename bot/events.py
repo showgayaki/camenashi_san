@@ -44,6 +44,7 @@ class EventListeners(commands.Cog):
                 new = create_toilet(
                     message_id=message.id,
                     video_file_path=file_path,
+                    url=message.jump_url,
                 )
 
                 admin_channel = self.bot.get_channel(config.DISCORD_ADMIN_CHANNEL_ID)

@@ -11,13 +11,14 @@ from ..session import get_db
 logger = getLogger('bot')
 
 
-def create_toilet(message_id: int, video_file_path: str) -> Toilet | None:
+def create_toilet(message_id: int, video_file_path: str, url: str) -> Toilet | None:
     db = next(get_db())
     now = datetime.now()
     new = Toilet(
         category_id=1,
         message_id=message_id,
         video_file_path=video_file_path,
+        url=url,
         created_at=now,
         updated_at=now,
     )

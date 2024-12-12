@@ -30,6 +30,7 @@ class Toilet(Base):
     message_id = Column(BigInteger, default=0, unique=True, nullable=False)
     category_id = Column(Integer, ForeignKey('category.id'))
     video_file_path = Column(String(255), default='', nullable=False)
+    url = Column(String(255), nullable=True)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, default=datetime.now(), nullable=False)
     category = relationship('Category', back_populates='toilet')
@@ -40,6 +41,7 @@ class Toilet(Base):
             'message_id': self.message_id,
             'category_id': self.category_id,
             'video_file_path': self.video_file_path,
+            'url': self.url,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
         }
