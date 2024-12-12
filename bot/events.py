@@ -36,6 +36,12 @@ class EventListeners(commands.Cog):
         """
         logger.info(f'Message received from {message.author.name}: {message.content}')
         mention_ids = [mention.id for mention in message.mentions]
+
+        # devのときは、かめなしチャンネルには反応しない
+        if config.ENVIRONMENT == 'dev' and message.channel.id == config.NON_MONITORED_CHANNEL_ID:
+            logger.info(f'Not reply channel: {message.channel.name}(id: {message.channel.id})')
+            return
+
         # 自分(bot)へのメンションで、WebhookからのメッセージならDBに登録
         if config.MENTION_ID in mention_ids:
             if message.author.bot:
@@ -53,11 +59,6 @@ class EventListeners(commands.Cog):
                 # 人間にはうんちでやんす
                 await message.channel.send('💩')
         else:
-            # devのときは、かめなしチャンネルには反応しない
-            if config.ENVIRONMENT == 'dev' and message.channel.id == config.NON_MONITORED_CHANNEL_ID:
-                logger.info(f'Not reply channel: {message.channel.name}(id: {message.channel.id})')
-                return
-
             # キーワードに合致するか、「⚪︎日前」ならDBからレコードを検索してリプライする
             if message.content in config.KEYWORDS.__dict__.values() or\
                     message.content.endswith(config.KEYWORDS.days):
@@ -82,6 +83,11 @@ class EventListeners(commands.Cog):
         logger.info(f'Reaction added: {reaction.emoji} to message id[{reaction.message_id}] by {reaction.member.name}')
         if reaction.member.bot:
             return  # Botのリアクションは無視
+
+        # devのときは、かめなしチャンネルには反応しない
+        if config.ENVIRONMENT == 'dev' and reaction.channel_id == config.NON_MONITORED_CHANNEL_ID:
+            logger.info('Not reply channel')
+            return
 
         # リアクションされたメッセージが、
         # DBに登録されたメッセージか(Webhookから通知されたものか)、DBに登録のあるemojiか確認
@@ -141,6 +147,11 @@ class EventListeners(commands.Cog):
         guild = self.bot.get_guild(reaction.guild_id)  # サーバー情報を取得
         user_name = 'Unknown' if guild is None else guild.get_member(reaction.user_id).name
         logger.info(f'Reaction removed: {reaction.emoji} from message id[{reaction.message_id}] by {user_name}')
+
+        # devのときは、かめなしチャンネルには反応しない
+        if config.ENVIRONMENT == 'dev' and reaction.channel_id == config.NON_MONITORED_CHANNEL_ID:
+            logger.info('Not reply channel')
+            return
 
         # emojiをremoveされたメッセージがDBに登録されているか
         toilet = read_toilet_by_message_id(reaction.message_id)
