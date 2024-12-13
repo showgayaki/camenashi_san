@@ -17,8 +17,8 @@ def create_toilet(message_id: int, video_file_path: str, message_url: str) -> To
     new = Toilet(
         category_id=1,
         message_id=message_id,
-        video_file_path=video_file_path,
         message_url=message_url,
+        video_file_path=video_file_path,
         created_at=now,
         updated_at=now,
     )

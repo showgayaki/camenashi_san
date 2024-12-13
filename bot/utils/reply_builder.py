@@ -37,9 +37,12 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
         term = f'{term}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
 
     total = {}
-    results = '```\n'
+    results = ''
     for record in records:
-        results += f'{record.created_at.strftime('%Y/%m/%d %H:%M:%S')}: {record.category.name}\n'
+        # message_urlがあればリンクをつける
+        category_name = f'[{record.category.name}]({record.message_url}) {config.EMOJI_EXTERNAL_LINK}'\
+            if record.message_url else record.category.name
+        results += f'`{record.created_at.strftime('%Y/%m/%d %H:%M:%S')}:` {category_name}\n'
 
         if record.category.emoji is None:
             continue
@@ -49,7 +52,6 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
             else:
                 total[record.category.emoji] += 1
 
-    results += '\n```'
     total_str = '    '.join([f'{key}`: {value}回`' for key, value in total.items()])
 
     return (f'{term}のおトイレ結果です\n'

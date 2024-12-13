@@ -4,6 +4,7 @@
 _backup/
 memo.md
 db_data/
+*.log*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

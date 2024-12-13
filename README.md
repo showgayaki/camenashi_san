@@ -33,6 +33,8 @@ DB_PORT=33061  # データベースのポート番号
 DB_USER=  # データベースのユーザー名
 DB_PASS=  # DB_USERのパスワード
 DB_NAME=camenashi  # データーベース名
+
+EMOJI_EXTERNAL_LINK=  # リンク用の絵文字「\:external_link:」とポストするとIDを取れる
 ```
 
 ## Docker実行

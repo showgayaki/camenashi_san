@@ -28,6 +28,7 @@ def load_config() -> SimpleNamespace:
             last_month='先月',
             days='日前',
         ),
+        'EMOJI_EXTERNAL_LINK': os.getenv('EMOJI_EXTERNAL_LINK'),
     }
 
     return SimpleNamespace(**cfg)
