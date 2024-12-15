@@ -26,19 +26,14 @@ services:
   camenashi_db:
     build:
       context: ./camenashi_db/
-      # args:
-      #   DB_PORT: ${DB_PORT}
     image: camenashi_db
     container_name: camenashi_db
     hostname: camenashi_db
-    volumes:
-      - type: bind
-        source: ./camenashi_db/db_data/
-        target: /var/lib/mysql
     ports:
       - "${DB_PORT}:${DB_PORT}"
     restart: always
     environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
       TZ: Asia/Tokyo
     networks:
       - camenashi_network
