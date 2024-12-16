@@ -7,6 +7,7 @@ from utils.message_parser import extract_file_path
 from utils.reply_builder import parrot_reply, category_update_reply
 from database.crud.toilet import create_toilet, read_toilet_by_message_id, update_toilet
 from database.crud.category import read_category, read_category_all
+from commands.search_records import SearchRecords
 
 
 # 設定の読み込み
@@ -62,7 +63,7 @@ class EventListeners(commands.Cog):
             # キーワードに合致するか、「⚪︎日前」ならDBからレコードを検索してリプライする
             if message.content in config.KEYWORDS.__dict__.values() or\
                     message.content.endswith(config.KEYWORDS.days):
-                search_records_cog = self.bot.get_cog('SearchRecords')
+                search_records_cog: SearchRecords = self.bot.get_cog('SearchRecords')
                 reply = await search_records_cog.reply(message=message)
                 await message.channel.send(reply)
             else:  # キーワードに合致せず

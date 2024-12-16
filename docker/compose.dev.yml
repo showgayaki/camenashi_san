@@ -33,7 +33,10 @@ services:
       - "${DB_PORT}:${DB_PORT}"
     restart: always
     environment:
+      MARIADB_DATABASE: ${DB_NAME}
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASS}
       TZ: Asia/Tokyo
     networks:
       - camenashi_network
