@@ -132,7 +132,7 @@ class EventListeners(commands.Cog):
                 # スレッドがない場合、新しいスレッドを作成
                 thread = await message.create_thread(
                     name=f'スッドレ {toilet.video_file_path.split('/')[-1]}',
-                    auto_archive_duration=1440,  # アーカイブまでの時間（分単位で設定）
+                    auto_archive_duration=config.AUTO_ARCHIVE_DURATION,  # アーカイブまでの時間（分単位で設定）
                 )
 
             # category_idを更新
@@ -185,7 +185,7 @@ class EventListeners(commands.Cog):
                 # スレッドがない場合、新しいスレッドを作成
                 thread = await message.create_thread(
                     name=f'スッドレ {toilet.video_file_path.split('/')[-1]}',
-                    auto_archive_duration=1440,  # アーカイブまでの時間（分単位で設定）
+                    auto_archive_duration=config.AUTO_ARCHIVE_DURATION,  # アーカイブまでの時間（分単位で設定）
                 )
 
             # メッセージについているリアクションのリスト
