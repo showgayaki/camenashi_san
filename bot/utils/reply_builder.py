@@ -22,7 +22,7 @@ def keywords_reply(keywords: list) -> str:
     return f'{message}```'
 
 
-def records_reply(term: str, start: datetime, end: datetime, records: list[Toilet]) -> str:
+def records_reply(term: str, start: datetime, end: datetime, records: list[Toilet]) -> list | str:
     if len(records) == 0:
         return f'{term}はおトイレしていません'
 
@@ -54,9 +54,27 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
 
     total_str = '    '.join([f'{key}`: {value}回`' for key, value in total.items()])
 
-    return (f'{term}のおトイレ結果です\n'
-            f'{total_str}\n'
-            f'{results}\n')
+    reply_str = (f'{term}のおトイレ結果です\n'
+                 f'{total_str}\n'
+                 f'{results}')
+
+    # メッセージ1回あたりの文字数制限があるので、検証
+    if len(reply_str) < config.MESSAGE_LIMIT_LENGTH:
+        return reply_str
+
+    logger.info(f'The message length exceeds {config.MESSAGE_LIMIT_LENGTH} characters.')
+    reply_tmp = ''
+    reply = []
+    for line in reply_str.splitlines():
+        # 文字数制限超えた？
+        if len(reply_tmp + line) > config.MESSAGE_LIMIT_LENGTH:
+            reply.append(f'{reply_tmp}\n')
+            reply_tmp = f'{line}\n'
+        else:
+            reply_tmp += f'{line}\n'
+    reply.append(reply_tmp)
+
+    return reply
 
 
 def category_update_reply(id_before: int, id_after: int, categories: list[Category]) -> str:

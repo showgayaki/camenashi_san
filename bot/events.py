@@ -35,7 +35,9 @@ class EventListeners(commands.Cog):
         """
         ユーザーがメッセージを投稿したときに呼び出されるイベント。
         """
-        logger.info(f'Message received from {message.author.name}: {message.content}')
+        # ログに出すのは1行目だけ
+        message_content = f'{message.content.splitlines()[0]}...' if '\n' in message.content else message.content
+        logger.info(f'Message received from {message.author.name}: {message_content}')
         mention_ids = [mention.id for mention in message.mentions]
 
         # devのときは、かめなしチャンネルには反応しない
@@ -65,7 +67,13 @@ class EventListeners(commands.Cog):
                     message.content.endswith(config.KEYWORDS.days):
                 search_records_cog: SearchRecords = self.bot.get_cog('SearchRecords')
                 reply = await search_records_cog.reply(message=message)
-                await message.channel.send(reply)
+
+                if isinstance(reply, list):
+                    for r in reply:
+                        await message.channel.send(r)
+                else:
+                    await message.channel.send(reply)
+
             else:  # キーワードに合致せず
                 # Botの投稿なら無視
                 if message.author.bot:

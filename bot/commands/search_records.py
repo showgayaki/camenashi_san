@@ -33,7 +33,7 @@ class SearchRecords(commands.Cog):
         reply = await self.reply(interaction=interaction)
         await interaction.response.send_message(reply)
 
-    async def reply(self, interaction: Interaction = None, message: discord.Message = None) -> None:
+    async def reply(self, interaction: Interaction = None, message: discord.Message = None) -> list | str:
         # interactionがNoneじゃなければスラッシュコマンド
         if interaction:
             keyword = getattr(config.KEYWORDS, interaction.command.name)
