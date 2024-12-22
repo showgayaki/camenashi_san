@@ -48,7 +48,7 @@ class SearchRecords(commands.Cog):
             if isinstance(days, int):
                 now = datetime.now()
                 start = start_datetime(now, keyword)
-                end = end_datetime(now, keyword)
+                end = end_datetime(start, keyword)
 
                 records = read_toilet_by_created_at_with_category(start, end)
                 reply = records_reply(keyword, start, end, records)
@@ -57,7 +57,7 @@ class SearchRecords(commands.Cog):
         else:
             now = datetime.now()
             start = start_datetime(now, keyword)
-            end = end_datetime(now, keyword)
+            end = end_datetime(start, keyword)
 
             records = read_toilet_by_created_at_with_category(start, end)
             reply = records_reply(keyword, start, end, records)
