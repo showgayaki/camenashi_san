@@ -13,6 +13,7 @@ def load_config() -> SimpleNamespace:
         'DISCORD_GUILD_ID': int(os.getenv('DISCORD_GUILD_ID')),
         'MENTION_ID': int(os.getenv('MENTION_ID')),
         'MESSAGE_LIMIT_LENGTH': int(os.getenv('MESSAGE_LIMIT_LENGTH', 2000)),
+        'THREAD_PREFIX': os.getenv('THREAD_PREFIX'),
         'AUTO_ARCHIVE_DURATION': int(os.getenv('AUTO_ARCHIVE_DURATION', 60)),
         'DB_HOST': os.getenv('DB_HOST'),
         'DB_PORT': os.getenv('DB_PORT'),

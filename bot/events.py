@@ -37,13 +37,25 @@ class EventListeners(commands.Cog):
         """
         # ログに出すのは1行目だけ
         message_content = f'{message.content.splitlines()[0]}...' if '\n' in message.content else message.content
-        logger.info(f'Message received: {{id: {message.id}, type: {message.type}, message.author.name: {message.author.name}, message.content: {message_content}}}')
+        logger.info(f"Message received: {{'id': {message.id}, 'type': {message.type}, 'message.author.name': {message.author.name}, 'message.content': {message_content}}}")
         mention_ids = [mention.id for mention in message.mentions]
 
         # devのときは、かめなしチャンネルには反応しない
         if config.ENVIRONMENT == 'dev' and message.channel.id == config.NON_MONITORED_CHANNEL_ID:
             logger.info(f'Not reply channel: {message.channel.name}(id: {message.channel.id})')
             return
+
+        # スレッド作成メッセージはジャマくさいので削除
+        if message.type == discord.MessageType.thread_created and\
+            message.content.startswith(config.THREAD_PREFIX) and\
+                message.content.endswith('.mp4'):
+            logger.info('Received a "thread_created" message: Deleting it.')
+            try:
+                await message.delete()
+            except Exception as e:
+                logger.error(f'Error occurred: {e}')
+            finally:
+                return
 
         # 自分(bot)へのメンションで、WebhookからのメッセージならDBに登録
         if config.MENTION_ID in mention_ids:
@@ -131,7 +143,7 @@ class EventListeners(commands.Cog):
             else:
                 # スレッドがない場合、新しいスレッドを作成
                 thread = await message.create_thread(
-                    name=f'スッドレ {toilet.video_file_path.split('/')[-1]}',
+                    name=f'{config.THREAD_PREFIX} {toilet.video_file_path.split('/')[-1]}',
                     auto_archive_duration=config.AUTO_ARCHIVE_DURATION,  # アーカイブまでの時間（分単位で設定）
                 )
 
@@ -184,7 +196,7 @@ class EventListeners(commands.Cog):
             else:
                 # スレッドがない場合、新しいスレッドを作成
                 thread = await message.create_thread(
-                    name=f'スッドレ {toilet.video_file_path.split('/')[-1]}',
+                    name=f'{config.THREAD_PREFIX} {toilet.video_file_path.split('/')[-1]}',
                     auto_archive_duration=config.AUTO_ARCHIVE_DURATION,  # アーカイブまでの時間（分単位で設定）
                 )
 
