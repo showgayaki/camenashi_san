@@ -22,7 +22,7 @@ def keywords_reply(keywords: list) -> str:
     return f'{message}```'
 
 
-def records_reply(term: str, start: datetime, end: datetime, records: list[Toilet]) -> list | str:
+def records_reply(term: str, start: datetime, end: datetime, records: list[Toilet], categories: list[Category]) -> list | str:
     if len(records) == 0:
         return f'{term}はおトイレしていません'
 
@@ -37,6 +37,10 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
         term = f'{term}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
 
     total = {}
+    for category in categories:
+        if category.emoji is not None:
+            total[category.emoji] = 0
+
     results = ''
     for record in records:
         # message_urlがあればリンクをつける
@@ -47,12 +51,9 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
         if record.category.emoji is None:
             continue
         else:
-            if record.category.emoji not in total:
-                total[record.category.emoji] = 1
-            else:
-                total[record.category.emoji] += 1
+            total[record.category.emoji] += 1
 
-    total_str = '    '.join([f'{key}`: {value}回`' for key, value in total.items()])
+    total_str = '    '.join([f'{key}`: {value}回`' if value > 0 else '' for key, value in total.items()])
 
     reply_str = (f'{term}のおトイレ結果です\n'
                  f'{total_str}\n'

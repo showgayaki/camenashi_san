@@ -8,6 +8,7 @@ from utils.config_manager import ConfigManager
 from utils.reply_builder import keywords_reply, records_reply
 from utils.message_parser import zenkaku_to_int_days, start_datetime, end_datetime
 from database.crud.toilet import read_toilet_by_created_at_with_category
+from database.crud.category import read_category_all
 
 
 config = ConfigManager().config
@@ -51,7 +52,8 @@ class SearchRecords(commands.Cog):
                 end = end_datetime(start, keyword)
 
                 records = read_toilet_by_created_at_with_category(start, end)
-                reply = records_reply(keyword, start, end, records)
+                categories = read_category_all()
+                reply = records_reply(keyword, start, end, records, categories)
             else:
                 reply = days
         else:
@@ -60,7 +62,8 @@ class SearchRecords(commands.Cog):
             end = end_datetime(start, keyword)
 
             records = read_toilet_by_created_at_with_category(start, end)
-            reply = records_reply(keyword, start, end, records)
+            categories = read_category_all()
+            reply = records_reply(keyword, start, end, records, categories)
 
         return reply
 
