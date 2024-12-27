@@ -37,7 +37,7 @@ class EventListeners(commands.Cog):
         """
         # ログに出すのは1行目だけ
         message_content = f'{message.content.splitlines()[0]}...' if '\n' in message.content else message.content
-        logger.info(f'Message received from {message.author.name}: {message_content}')
+        logger.info(f'Message received: {{id: {message.id}, type: {message.type}, message.author.name: {message.author.name}, message.content: {message_content}}}')
         mention_ids = [mention.id for mention in message.mentions]
 
         # devのときは、かめなしチャンネルには反応しない
