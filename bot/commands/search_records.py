@@ -4,7 +4,7 @@ import discord
 from discord import app_commands, Interaction
 from discord.ext import commands
 
-from utils.config_manager import ConfigManager
+from utils.config import ConfigManager
 from utils.reply_builder import keywords_reply, records_reply
 from utils.message_parser import zenkaku_to_int_days, start_datetime, end_datetime
 from database.crud.toilet import read_toilet_by_created_at_with_category

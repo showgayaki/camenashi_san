@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from bot.utils.config_manager import ConfigManager
+from bot.utils.config import ConfigManager
 from bot.database.models import Base
 
 

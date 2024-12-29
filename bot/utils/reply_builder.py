@@ -1,7 +1,7 @@
 from logging import getLogger
 from datetime import datetime
 
-from utils.config_manager import ConfigManager
+from utils.config import ConfigManager
 from database.models import Toilet, Category
 
 

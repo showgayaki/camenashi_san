@@ -2,7 +2,7 @@ from logging import getLogger
 import discord
 from discord.ext import commands
 
-from utils.config_manager import ConfigManager
+from utils.config import ConfigManager
 from utils.message_parser import extract_file_path
 from utils.reply_builder import parrot_reply, category_update_reply
 from database.crud.toilet import create_toilet, read_toilet_by_message_id, update_toilet

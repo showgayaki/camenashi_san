@@ -2,7 +2,7 @@ from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from utils.config_manager import ConfigManager
+from utils.config import ConfigManager
 
 # 設定の読み込み
 config = ConfigManager().config

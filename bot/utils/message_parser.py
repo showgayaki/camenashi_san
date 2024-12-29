@@ -1,7 +1,7 @@
 from logging import getLogger
 from datetime import datetime, timedelta, time
 
-from utils.config_manager import ConfigManager
+from utils.config import ConfigManager
 
 
 config = ConfigManager().config

@@ -2,7 +2,7 @@ from logging import getLogger
 import discord
 from discord.ext import commands
 
-from utils.config_manager import ConfigManager
+from utils.config import ConfigManager
 from utils.logger import load_looger
 
 
@@ -37,6 +37,10 @@ async def main():
             await bot.load_extension(extension)
         except Exception as e:
             logger.error(f'Failed to load extension {extension}. Error: {e}')
+
+    # configの内容を出力(パスワードやトークンは除く)
+    app_config = {key: '' if 'PASS' in key or 'TOKEN' in key else value for key, value in vars(config).items()}
+    logger.info(f'App Config: {app_config}')
 
     # Botの起動
     logger.info('Starting Bot.')

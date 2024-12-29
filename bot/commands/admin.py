@@ -4,7 +4,7 @@ import importlib
 import discord
 from discord.ext import commands
 
-from utils.config_manager import ConfigManager
+from utils.config import ConfigManager
 
 # 設定の読み込み
 config = ConfigManager().config
