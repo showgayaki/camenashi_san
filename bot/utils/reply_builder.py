@@ -36,10 +36,7 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
         # 先週と先月の場合は期間を入れておく
         term = f'{term}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
 
-    total = {}
-    for category in categories:
-        if category.emoji is not None:
-            total[category.emoji] = 0
+    total = {category.emoji: 0 for category in categories if category.emoji is not None}
 
     results = ''
     for record in records:
@@ -53,7 +50,7 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
         else:
             total[record.category.emoji] += 1
 
-    total_str = '    '.join([f'{key}`: {value}回`' if value > 0 else '' for key, value in total.items()])
+    total_str = '    '.join([f'{key}`: {value}回`' for key, value in total.items() if value > 0])
 
     reply_str = (f'{term}のおトイレ結果です\n'
                  f'{total_str}\n'
