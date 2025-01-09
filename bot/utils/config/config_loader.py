@@ -14,6 +14,11 @@ class Keywords:
     last_week: str = '先週'
     last_month: str = '先月'
     days: str = '日前'
+    gragh: str = 'グラフ'
+
+    def periods(self) -> list:
+        exclude_keys = ['keyword', 'today', 'yesterday', 'day_before_yesterday', 'days', 'gragh']
+        return [key for key in self.__dict__.keys() if key not in exclude_keys]
 
 
 @dataclass

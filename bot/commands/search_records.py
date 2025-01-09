@@ -1,5 +1,4 @@
 from logging import getLogger
-from datetime import datetime
 import discord
 from discord import app_commands, Interaction
 from discord.ext import commands
@@ -47,8 +46,7 @@ class SearchRecords(commands.Cog):
         elif keyword.endswith(config.KEYWORDS.days):  # ⚪︎日前の処理
             days = zenkaku_to_int_days(keyword)
             if isinstance(days, int):
-                now = datetime.now()
-                start = start_datetime(now, keyword)
+                start = start_datetime(keyword)
                 end = end_datetime(start, keyword)
 
                 records = read_toilet_by_created_at_with_category(start, end)
@@ -57,8 +55,7 @@ class SearchRecords(commands.Cog):
             else:
                 reply = days
         else:
-            now = datetime.now()
-            start = start_datetime(now, keyword)
+            start = start_datetime(keyword)
             end = end_datetime(start, keyword)
 
             records = read_toilet_by_created_at_with_category(start, end)

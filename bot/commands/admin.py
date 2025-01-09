@@ -40,6 +40,7 @@ class AdminCog(commands.Cog):
         prefixes = [
             'database',
             'utils',
+            'views',
         ]
 
         reloaded_modules = []
@@ -52,5 +53,5 @@ class AdminCog(commands.Cog):
         logger.info(f'Reloaded modules: {reloaded_modules}')
 
 
-async def setup(bot):
+async def setup(bot: commands.Bot):
     await bot.add_cog(AdminCog(bot), guild=discord.Object(id=config.DISCORD_GUILD_ID))

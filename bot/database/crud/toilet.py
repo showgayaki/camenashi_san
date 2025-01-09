@@ -58,8 +58,7 @@ def read_toilet_by_message_id(message_id: int) -> Toilet | None:
 
 
 def read_toilet_by_created_at_with_category(start: datetime, end: datetime) -> list[Toilet]:
-    logger.info(f'Start date: {start}')
-    logger.info(f'End date: {end}')
+    logger.info(f'Read DB: {start} ~ {end}')
 
     db = next(get_db())
     records = []

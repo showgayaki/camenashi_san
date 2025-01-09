@@ -7,6 +7,8 @@ locales mariadb-client \
 gcc libmariadb-dev \
 # required discord.py
 libffi-dev libnacl-dev python3-dev \
+# required matplotlib(日本語対応フォント)
+fonts-noto-cjk \
 && localedef -f UTF-8 -i ja_JP ja_JP.UTF-8 \
 && rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get autoclean && apt-get autoremove \
 && pip install --upgrade pip setuptools

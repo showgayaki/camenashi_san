@@ -29,7 +29,9 @@ def zenkaku_to_int_days(zenkaku_str: str):
         return 'ココハドコ？ワタシハダレ？？'
 
 
-def start_datetime(now: datetime, keyword: str) -> datetime:
+def start_datetime(keyword: str) -> datetime:
+    now = datetime.now()
+
     if keyword == config.KEYWORDS.today:
         return datetime.combine(now.date(), time.min)
     elif keyword == config.KEYWORDS.this_week:
@@ -58,7 +60,9 @@ def start_datetime(now: datetime, keyword: str) -> datetime:
         # 前の日曜日のさらに1週間前が、先週の日曜日
         return datetime.combine(last_sunday, time.min)
     elif keyword == config.KEYWORDS.last_month:
-        return datetime(now.year, now.month - 1, 1)
+        this_month_1st = now.replace(day=1)
+        last_month = this_month_1st - timedelta(days=1)
+        return datetime.combine(last_month.replace(day=1), time.min)
     elif config.KEYWORDS.days in keyword:
         days = zenkaku_to_int_days(keyword)
         return datetime.combine(now - timedelta(days=days), time.min)
@@ -72,7 +76,8 @@ def end_datetime(start: datetime, keyword: str) -> datetime:
     elif keyword == config.KEYWORDS.last_week:
         return datetime.combine(start + timedelta(days=6), time.max)
     elif keyword == config.KEYWORDS.last_month:
-        this_month_1st = datetime(start.year, start.month + 1, 1)
+        this_month_1st = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        logger.info(f'this_month_1st: {this_month_1st}')
         # 今月の1日から一瞬戻れば先月の最終日時
         return this_month_1st - timedelta(microseconds=1)
     else:

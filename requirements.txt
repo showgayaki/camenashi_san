@@ -3,3 +3,5 @@ discord.py
 mariadb
 sqlalchemy
 alembic
+pandas
+matplotlib

@@ -9,6 +9,20 @@ config = ConfigManager().config
 logger = getLogger('bot')
 
 
+def _period(period: str, start: datetime, end: datetime) -> str:
+    # ⚪︎日前と昨日・一昨日のときは、日にちをかっこ書きで入れておく
+    if config.KEYWORDS.days in period or\
+            period == config.KEYWORDS.yesterday or\
+            period == config.KEYWORDS.day_before_yesterday:
+        period = f'{period}（{start.strftime("%m/%d")}）'
+    elif period == config.KEYWORDS.last_week or\
+            period == config.KEYWORDS.last_month:
+        # 先週と先月の場合は期間を入れておく
+        period = f'{period}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
+
+    return period
+
+
 def parrot_reply(message: str) -> str:
     return (message.translate(str.maketrans('?？', '！！'))
             .replace('か', '').replace('なの', '').replace('でしょう', ''))
@@ -22,20 +36,11 @@ def keywords_reply(keywords: list) -> str:
     return f'{message}```'
 
 
-def records_reply(term: str, start: datetime, end: datetime, records: list[Toilet], categories: list[Category]) -> list | str:
+def records_reply(period: str, start: datetime, end: datetime, records: list[Toilet], categories: list[Category]) -> list | str:
     if len(records) == 0:
-        return f'{term}はおトイレしていません'
+        return f'{period}はおトイレしていません'
 
-    # ⚪︎日前と昨日・一昨日のときは、日にちをかっこ書きで入れておく
-    if config.KEYWORDS.days in term or\
-            term == config.KEYWORDS.yesterday or\
-            term == config.KEYWORDS.day_before_yesterday:
-        term = f'{term}（{start.strftime("%m/%d")}）'
-    elif term == config.KEYWORDS.last_week or\
-            term == config.KEYWORDS.last_month:
-        # 先週と先月の場合は期間を入れておく
-        term = f'{term}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
-
+    period = _period(period, start, end)
     total = {category.emoji: 0 for category in categories if category.emoji is not None}
 
     results = ''
@@ -52,7 +57,7 @@ def records_reply(term: str, start: datetime, end: datetime, records: list[Toile
 
     total_str = '    '.join([f'{key}`: {value}回`' for key, value in total.items() if value > 0])
 
-    reply_str = (f'{term}のおトイレ結果です\n'
+    reply_str = (f'{period}のおトイレ結果です\n'
                  f'{total_str}\n'
                  f'{results}')
 
@@ -84,3 +89,8 @@ def category_update_reply(id_before: int, id_after: int, categories: list[Catego
         return f'おトイレの種別が「{emoji_before}」から「{emoji_after}」に変更されたでやんす'
     else:
         return 'おトイレの種別の変更に失敗したでやんす'
+
+
+def graph_reply(period: str, start: datetime, end: datetime) -> str:
+    period = _period(period, start, end)
+    return f'{period}のおトイレグラフでやんす'

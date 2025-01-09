@@ -8,6 +8,7 @@ from utils.reply_builder import parrot_reply, category_update_reply
 from database.crud.toilet import create_toilet, read_toilet_by_message_id, update_toilet
 from database.crud.category import read_category, read_category_all
 from commands.search_records import SearchRecords
+from views.period_buttons import PeriodButtons
 
 
 # 設定の読み込み
@@ -18,6 +19,8 @@ logger = getLogger('bot')
 class EventListeners(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.period_buttons = PeriodButtons()
+        self.bot.add_view(self.period_buttons)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -74,6 +77,10 @@ class EventListeners(commands.Cog):
                 # 人間にはうんちでやんす
                 await message.channel.send('💩')
         else:
+            if message_content == config.KEYWORDS.gragh:
+                await message.channel.send('どの期間のグラフを出すでやんすか？', view=self.period_buttons)
+                return
+
             # キーワードに合致するか、「⚪︎日前」ならDBからレコードを検索してリプライする
             if message.content in config.KEYWORDS.__dict__.values() or\
                     message.content.endswith(config.KEYWORDS.days):
@@ -85,15 +92,12 @@ class EventListeners(commands.Cog):
                         await message.channel.send(r)
                 else:
                     await message.channel.send(reply)
-
             else:  # キーワードに合致せず
-                # Botの投稿なら無視
-                if message.author.bot:
-                    return
-                elif '?' in message.content or '？' in message.content:
-                    # ユーザーからの質問なら元気にオウム返し
+                # ユーザーからの質問なら元気にオウム返し
+                if not message.author.bot and\
+                        (message.content.endswith('?') or message.content.endswith('？')):
                     await message.channel.send(parrot_reply(message.content))
-                else:
+                else:  # Botの投稿なら無視
                     return
 
     @commands.Cog.listener()

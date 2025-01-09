@@ -13,6 +13,7 @@ class Category(Base):
     name = Column(String(20), default='', unique=True, nullable=False)
     emoji = Column(String(20), default='', unique=True)
     include_in_summary = Column(Boolean, default=True, server_default=text('True'), nullable=False)
+    graph_color = Column(String(20), default='gray')
     toilet = relationship('Toilet', back_populates='category')
 
     def to_dict(self):
@@ -21,6 +22,7 @@ class Category(Base):
             'name': self.name,
             'emoji': self.emoji,
             'include_in_summary': self.include_in_summary,
+            'graph_color': self.graph_color,
         }
 
 
