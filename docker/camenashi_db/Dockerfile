@@ -1,10 +1,14 @@
-FROM mariadb:10.5.22
+FROM mariadb:10.5.22 AS builder
 
 RUN apt-get update -y && apt-get upgrade -y \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 locales \
-&& localedef -f UTF-8 -i ja_JP ja_JP.UTF-8 \
-&& rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get autoclean && apt-get autoremove
+&& localedef -f UTF-8 -i ja_JP ja_JP.UTF-8
+
+
+FROM mariadb:10.5.22 AS prod
+
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 ENV LANG=ja_JP.UTF-8
 ENV LANGUAGE=ja_JP:ja

@@ -13,8 +13,5 @@ services:
       - type: bind
         source: "../bot"
         target: "/app/bot"
-      - type: bind
-        source: "../alembic"
-        target: "/app/alembic"
     restart: always
     tty: true
