@@ -12,8 +12,6 @@ ENV ARCH aarch64
 
 FROM python:3.12-slim-bookworm AS builder
 
-COPY requirements.txt requirements.txt
-
 RUN apt-get update -y && apt-get upgrade -y \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 locales \
@@ -24,8 +22,10 @@ libffi-dev libnacl-dev python3-dev \
 # required matplotlib(日本語対応フォント)
 fonts-noto-cjk \
 && localedef -f UTF-8 -i ja_JP ja_JP.UTF-8 \
-&& pip install --upgrade pip setuptools && \
-pip install --no-cache-dir --upgrade -r requirements.txt
+&& pip install --upgrade pip setuptools
+
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 
 FROM ${TARGETARCH} AS prod

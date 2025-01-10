@@ -18,19 +18,18 @@ def draw_toilet_records(label: str, period: str, records: list[Toilet], categori
     logger.info(f'category_names: {category_names}')
 
     data = {
-        'datetime': [record.created_at for record in records],
-        'type': [record.category.name for record in records],
+        'created_at': [record.created_at for record in records],
+        'category': [record.category.name for record in records],
     }
 
     # データフレームの作成
     df = pd.DataFrame(data)
-    df['datetime'] = pd.to_datetime(df['datetime'])
-    df['date'] = df['datetime'].dt.date
+    df['created_at'] = pd.to_datetime(df['created_at'])
     # 年を除いた日付フォーマットに変換
-    df['formatted_date'] = df['datetime'].dt.strftime('%m-%d')
+    df['formatted_date'] = df['created_at'].dt.strftime('%m-%d')
 
     # 集計
-    summary = df.groupby(['formatted_date', 'type']).size().unstack(fill_value=0)
+    summary = df.groupby(['formatted_date', 'category'], sort=False).size().unstack(fill_value=0)
     # すべてのカテゴリを含める
     for category in category_names:
         if category not in summary.columns:
