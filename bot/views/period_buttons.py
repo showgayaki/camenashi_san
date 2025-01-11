@@ -1,5 +1,4 @@
 from logging import getLogger
-from pathlib import Path
 import discord
 
 from database.crud.toilet import read_toilet_by_created_at_with_category
@@ -56,4 +55,5 @@ class PeriodButton(discord.ui.Button):
             logger.error(f'Failed to post message: {e}')
         finally:
             logger.info(f'Deleting {graph_image_path}')
-            Path(graph_image_path).unlink()
+            if graph_image_path.exists():
+                graph_image_path.unlink()  # ファイルが存在する場合のみ削除

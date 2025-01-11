@@ -53,3 +53,7 @@ if __name__ == '__main__':
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info('KeyboardInterrupt.')
+    finally:
+        # Botのセッションを正しく閉じる
+        if bot.is_closed() is False:
+            asyncio.run(bot.close())

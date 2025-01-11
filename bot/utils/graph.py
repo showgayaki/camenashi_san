@@ -36,7 +36,7 @@ def draw_toilet_records(label: str, period: str, records: list[Toilet], categori
             summary[category] = 0  # データがないカテゴリを0で補完
 
     # 列の順序を category_names に合わせる
-    summary = summary[category_names]
+    summary = summary.reindex(columns=category_names, fill_value=0)
 
     # 色を固定
     color_mapping = {
@@ -56,7 +56,7 @@ def draw_toilet_records(label: str, period: str, records: list[Toilet], categori
 
     plt.title(f'{label}のおトイレ回数')
     plt.ylabel('回数')
-    plt.xlabel('日時')
+    plt.xlabel('日付')
     plt.xticks(rotation=45, ha='right')
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     # 縦軸を整数に設定
@@ -76,4 +76,6 @@ def draw_toilet_records(label: str, period: str, records: list[Toilet], categori
     logger.info(f'Graph saved to {output_path}')
 
     plt.savefig(output_path, dpi=300, bbox_inches='tight')  # ファイルを保存
+    plt.close()  # メモリリークを防ぐためにプロットを閉じる
+
     return output_path
