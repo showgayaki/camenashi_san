@@ -23,9 +23,11 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 # コグのロード
 initial_extensions = [
-    'events',
-    'commands.search_records',
-    'commands.admin',
+    'cogs.events.on_ready',
+    'cogs.events.on_message',
+    'cogs.events.on_raw_reaction_add',
+    'cogs.events.on_raw_reaction_remove',
+    'cogs.admin',
 ]
 
 
