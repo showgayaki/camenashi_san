@@ -13,7 +13,7 @@ Discord Botです。
 CREATE DATABASE IF NOT EXISTS camenashi DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 ```
 devのときは、`docker/camenashi_db/init.sql`  
-として保存しておくと、Docker初回起動時にデータベースが作成されます。
+として保存しておくと、Docker起動時にデータベースが作成されます。
 
 ## envサンプル
 devのときは`env.dev`  
@@ -39,7 +39,12 @@ EMOJI_EXTERNAL_LINK=  # リンク用の絵文字「\:external_link:」とポス�
 
 ## Docker実行
 @dev  
-`docker compose --env-file .env.dev -f docker/compose.dev.yml up -d --build`
+`docker network create camenashi_network`(初回のみ)  
+`docker compose --env-file .env.dev -f docker/compose.dev.yml up --build`  
+更新時  
+`docker compose --env-file .env.dev -f docker/compose.dev.yml down && docker compose --env-file .env.dev -f docker/compose.dev.yml up --build`
 
 @prod  
 `docker compose -f docker/compose.yml up -d --build`  
+更新時  
+`docker compose -f docker/compose.yml down && docker compose -f docker/compose.yml up -d --build`  

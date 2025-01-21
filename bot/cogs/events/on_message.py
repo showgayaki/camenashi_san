@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from utils.config import ConfigManager
 from utils.message_parser import end_datetime, extract_file_path, start_datetime, zenkaku_to_int_days
-from utils.reply_builder import parrot_reply, keywords_reply, records_reply
+from utils.reply_builder import registered_new_record_reply, parrot_reply, keywords_reply, records_reply
 from database.crud.category import read_category_all
 from database.crud.toilet import create_toilet, read_toilet_by_created_at_with_category
 from views.period_buttons import PeriodButtons
@@ -60,8 +60,9 @@ class OnMessage(commands.Cog):
                     message_url=message.jump_url,
                 )
 
+                registered_message = registered_new_record_reply(new, file_path)
                 admin_channel = self.bot.get_channel(config.DISCORD_ADMIN_CHANNEL_ID)
-                await admin_channel.send(f'新しいおトイレコード(ID: {new.id})が登録されました')
+                await admin_channel.send(registered_message)
             else:
                 # 人間にはうんちでやんす
                 await message.channel.send('💩')

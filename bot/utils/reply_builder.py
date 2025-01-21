@@ -1,5 +1,6 @@
 from logging import getLogger
 from datetime import datetime
+from pathlib import Path
 
 from utils.config import ConfigManager
 from database.models import Toilet, Category
@@ -21,6 +22,24 @@ def _period(period: str, start: datetime, end: datetime) -> str:
         period = f'{period}（{start.strftime("%m/%d")}〜{end.strftime("%m/%d")}）'
 
     return period
+
+
+def registered_new_record_reply(new_record: Toilet, file_path: str) -> str:
+    admin_message = f'新しいおトイレコード(ID: {new_record.id})が登録されました'
+    file_created_at = Path(file_path).name.split('_')[0]
+    record_created_at = new_record.created_at.strftime('%Y%m%d-%H%M%S')
+    logger.info(f'file_created_at: {file_created_at}, record_created_at: {record_created_at}')
+
+    if file_created_at != record_created_at:
+        admin_message += ('\n'
+                          'ファイル名の作成日時と新しいレコードのcreated_atが一致しません\n'
+                          f'ID: {new_record.id} のcreated_atを確認してください\n'
+                          '```\n'
+                          f'from file : {file_created_at}\n'
+                          f'new record: {record_created_at}\n'
+                          '```')
+
+    return admin_message
 
 
 def parrot_reply(message: str) -> str:

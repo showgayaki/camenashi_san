@@ -1,5 +1,6 @@
 from logging import getLogger
 from datetime import datetime
+from pathlib import Path
 from sqlalchemy import select, and_
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
@@ -13,14 +14,24 @@ logger = getLogger('bot')
 
 def create_toilet(message_id: int, video_file_path: str, message_url: str) -> Toilet | None:
     db = next(get_db())
-    now = datetime.now()
+    # ファイル名から作成日時を取得
+    try:
+        created_at = datetime.strptime(
+            Path(video_file_path).name.split('_')[0],
+            '%Y%m%d-%H%M%S',
+        )
+    except Exception as e:
+        # ファイル名から作成日時が取得できなかった場合はしょうがないので現在時刻を使用
+        logger.error(f'Error occurred: {e}. Use current time instead.')
+        created_at = datetime.now()
+
     new = Toilet(
         category_id=1,
         message_id=message_id,
         message_url=message_url,
         video_file_path=video_file_path,
-        created_at=now,
-        updated_at=now,
+        created_at=created_at,
+        updated_at=created_at,
     )
 
     try:
