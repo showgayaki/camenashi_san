@@ -102,7 +102,7 @@ def read_toilet_by_created_at_with_category(start: datetime, end: datetime) -> l
     finally:
         db.close()
 
-    return records
+    return list(records)
 
 
 def update_toilet(message_id: int, category_id: int) -> tuple[int, int]:
@@ -113,7 +113,7 @@ def update_toilet(message_id: int, category_id: int) -> tuple[int, int]:
         # DBに登録がなければ終了
         if record is None:
             logger.info('No record found to update.')
-            return
+            return 0, 0
 
         logger.info(f'before: {record.to_dict()}')
         before = record.category_id

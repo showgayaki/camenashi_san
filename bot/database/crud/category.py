@@ -34,9 +34,9 @@ def read_category(
     return category
 
 
-def read_category_all(include_in_summary: bool | None = None) -> list[Category] | None:
+def read_category_all(include_in_summary: bool | None = None) -> list[Category]:
     db = next(get_db())
-    categories = None
+    categories = []
     try:
         logger.info('Starting read all category records.')
         categories = db.query(Category).all() if include_in_summary is None else db.query(
