@@ -1,20 +1,26 @@
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Boolean, Integer, BigInteger, String, DateTime, ForeignKey, text
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, BigInteger, String, ForeignKey, text
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 
 Base = declarative_base()
 
 
+class ToiletCategory(Base):
+    __tablename__ = 'toilet_category'
+    toilet_id: Mapped[int] = mapped_column(ForeignKey('toilet.id'), primary_key=True)
+    category_id: Mapped[int] = mapped_column(ForeignKey('category.id'), primary_key=True)
+
+
 class Category(Base):
     __tablename__ = 'category'
-    id = Column(Integer, primary_key=True, autoincrement=False, unique=True)
-    name = Column(String(20), default='', unique=True, nullable=False)
-    emoji = Column(String(20), default='', unique=True)
-    include_in_summary = Column(Boolean, default=True, server_default=text('True'), nullable=False)
-    graph_color = Column(String(20), default='gray')
-    toilet = relationship('Toilet', back_populates='category')
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=False, unique=True)
+    name: Mapped[str] = mapped_column(String(20), default='', unique=True, nullable=False)
+    emoji: Mapped[str] = mapped_column(String(20), default='', unique=True)
+    include_in_summary: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text('True'), nullable=False)
+    graph_color: Mapped[str] = mapped_column(String(20), default='gray')
+    toilets: Mapped[list['Toilet']] = relationship('Toilet', secondary='toilet_category', back_populates='categories')
 
     def to_dict(self):
         return {
@@ -28,22 +34,21 @@ class Category(Base):
 
 class Toilet(Base):
     __tablename__ = 'toilet'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    category_id = Column(Integer, ForeignKey('category.id'))
-    message_id = Column(BigInteger, default=0, unique=True, nullable=False)
-    message_url = Column(String(255), nullable=True)
-    video_file_path = Column(String(255), default='', nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(), nullable=False)
-    category = relationship('Category', back_populates='toilet')
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    message_id: Mapped[int] = mapped_column(BigInteger, default=0, unique=True, nullable=False)
+    message_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    video_file_path: Mapped[str] = mapped_column(String(255), default='', nullable=False)
+    created_at: Mapped[datetime] = mapped_column(nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.now(), nullable=False)
+    categories: Mapped[list['Category']] = relationship('Category', secondary='toilet_category', back_populates='toilets')
 
     def to_dict(self):
         return {
             'id': self.id,
-            'category_id': self.category_id,
             'message_id': self.message_id,
             'message_url': self.message_url,
             'video_file_path': self.video_file_path,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
+            'categories': [c.to_dict() for c in self.categories],
         }

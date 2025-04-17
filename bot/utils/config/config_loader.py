@@ -1,6 +1,10 @@
 import os
+from typing import Literal
 from dataclasses import dataclass
 from dotenv import load_dotenv
+
+
+ThreadArchiveDuration = Literal[60, 1440, 4320, 10080]
 
 
 @dataclass
@@ -31,7 +35,7 @@ class Config:
     MENTION_ID: int
     MESSAGE_LIMIT_LENGTH: int
     THREAD_PREFIX: str
-    AUTO_ARCHIVE_DURATION: int
+    AUTO_ARCHIVE_DURATION: ThreadArchiveDuration
     DB_HOST: str
     DB_PORT: str
     DB_USER: str
@@ -43,6 +47,11 @@ class Config:
 
 def load_config() -> Config:
     load_dotenv(override=True)  # .envファイルの読み込み
+
+    # durationの値を取得しつつ、キャスト
+    raw_duration = int(os.getenv('AUTO_ARCHIVE_DURATION', 60))
+    duration: ThreadArchiveDuration = raw_duration if raw_duration in (60, 1440, 4320, 10080) else 60
+
     return Config(
         ENVIRONMENT=os.getenv('ENVIRONMENT', 'dev'),
         NON_MONITORED_CHANNEL_ID=int(os.getenv('NON_MONITORED_CHANNEL_ID', 0)),
@@ -52,7 +61,7 @@ def load_config() -> Config:
         MENTION_ID=int(os.getenv('MENTION_ID', 0)),
         MESSAGE_LIMIT_LENGTH=int(os.getenv('MESSAGE_LIMIT_LENGTH', 2000)),
         THREAD_PREFIX=os.getenv('THREAD_PREFIX', 'Thread-'),
-        AUTO_ARCHIVE_DURATION=int(os.getenv('AUTO_ARCHIVE_DURATION', 60)),
+        AUTO_ARCHIVE_DURATION=duration,
         DB_HOST=os.getenv('DB_HOST', 'localhost'),
         DB_PORT=os.getenv('DB_PORT', '3306'),
         DB_USER=os.getenv('DB_USER', 'root'),

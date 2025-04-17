@@ -27,8 +27,8 @@ class OnMessage(commands.Cog):
         ユーザーがメッセージを投稿したときに呼び出されるイベント。
         """
         # ログに出すのは1行目だけ
-        message.content = f'{message.content.splitlines()[0]}...' if '\n' in message.content else message.content
-        logger.info(f"Message received: {{'id': {message.id}, 'type': {message.type}, 'message.author.name': {message.author.name}, 'message.content': {message.content}}}")
+        message_content_first_row = f'{message.content.splitlines()[0]}...' if '\n' in message.content else message.content
+        logger.info(f"Message received: {{'id': {message.id}, 'type': {message.type}, 'message.author.name': {message.author.name}, 'message.content': {message_content_first_row}}}")
         mention_ids = [mention.id for mention in message.mentions]
 
         # devのときは、かめなしチャンネルには反応しない
@@ -58,6 +58,7 @@ class OnMessage(commands.Cog):
                     message_id=message.id,
                     video_file_path=file_path,
                     message_url=message.jump_url,
+                    category_ids=[1],
                 )
 
                 registered_message = registered_new_record_reply(new, file_path)

@@ -4,8 +4,13 @@ from discord.ext import commands
 
 from utils.config import ConfigManager
 from utils.reply_builder import category_update_reply
-from database.crud.toilet import read_toilet_by_message_id, update_toilet
-from database.crud.category import read_category, read_category_all
+from database.crud.toilet import read_toilet_by_message_id_with_categories
+from database.crud.category import read_category
+from database.crud.toilet_category import (
+    update_toilet_category,
+    delete_toilet_category,
+    read_toilet_categories_by_tolet_id_all,
+)
 
 
 # 設定の読み込み
@@ -30,27 +35,41 @@ class OnRawReactionRemove(commands.Cog):
         にする。
         んでbot.pyで、intents.members = Trueする
         """
-        guild = self.bot.get_guild(reaction.guild_id)  # サーバー情報を取得
-        user_name = 'Unknown' if guild is None else guild.get_member(reaction.user_id).name
-        logger.info(f'Reaction removed: {reaction.emoji} from message id[{reaction.message_id}] by {user_name}')
-
+        if reaction.guild_id is None:
+            logger.error('reaction.guild_id is None')
+            return
         # devのときは、かめなしチャンネルには反応しない
         if config.ENVIRONMENT == 'dev' and reaction.channel_id == config.NON_MONITORED_CHANNEL_ID:
             logger.info('Not reply channel')
             return
 
+        guild = self.bot.get_guild(reaction.guild_id)
+        member = guild.get_member(reaction.user_id) if guild else None
+        logger.info(
+            f"Reaction removed: {reaction.emoji} to message id[{reaction.message_id}] by {member.name if member else 'Unknown User'}"
+        )
+
         # emojiをremoveされたメッセージがDBに登録されているか
-        toilet = read_toilet_by_message_id(reaction.message_id)
-        if toilet is None:
-            # 関係ないレコードなら終了
+        toilet_record = read_toilet_by_message_id_with_categories(reaction.message_id)
+        if toilet_record is None:
+            # 関係ないメッセージなら終了
             logger.info('No record found to update.')
             return
         else:
-            channel = self.bot.get_channel(reaction.channel_id)
-            reactions = []
+            category = read_category(emoji=str(reaction.emoji))
+            if category is None:
+                # 関係ない絵文字なら終了
+                logger.info('Removed emoji NOT found in the database.')
+                return
+            else:
+                logger.info(f'Removed emoji: {category.to_dict()}')
+
+            # サーバー・チャンネル情報を取得
+            channel = guild.get_channel(reaction.channel_id)
+            # リアクションが削除されたメッセージを取得
             try:
-                # すでに付けられているリアクションを取るために、メッセージ取得
-                message = await channel.fetch_message(reaction.message_id)
+                if isinstance(channel, discord.TextChannel):
+                    message = await channel.fetch_message(reaction.message_id)
             except Exception as e:
                 logger.error(f'Error occurred: {e}')
                 return
@@ -61,41 +80,24 @@ class OnRawReactionRemove(commands.Cog):
             else:
                 # スレッドがない場合、新しいスレッドを作成
                 thread = await message.create_thread(
-                    name=f'{config.THREAD_PREFIX} {toilet.video_file_path.split('/')[-1]}',
+                    name=f'{config.THREAD_PREFIX} {toilet_record.video_file_path.split("/")[-1]}',
                     auto_archive_duration=config.AUTO_ARCHIVE_DURATION,  # アーカイブまでの時間（分単位で設定）
                 )
 
-            # メッセージについているリアクションのリスト
-            reactions = [r.emoji for r in message.reactions]
-            logger.info(f'reactions: {reactions}')
-            # カテゴリー取得
-            categories = read_category_all()
-            # emojiのリスト(ノーリアクションとノー集計は除くので[2:]にしておく)
-            category_emojis = [cat.emoji for cat in categories][2:]
-            # すでにリアクションされているemojiのうち、DBに登録されているものを抜き出す
-            reacted_emojis_in_db = [emoji for emoji in reactions if emoji in category_emojis]
-            logger.info(f'reacted_emojis_in_db: {reacted_emojis_in_db}')
-
-            # emojiが０個になったら、ノーリアクション(id:1)に戻す
-            if len(reacted_emojis_in_db) == 0:
-                reacted_category_id = 1
-            elif len(reacted_emojis_in_db) == 1:
-                # 1個だけになったら、そのemoji(category)でレコード更新
-                reacted_category_id = read_category(emoji=reacted_emojis_in_db[0]).id
+            # category_idを更新、または削除
+            toilet_category_records = read_toilet_categories_by_tolet_id_all(toilet_record.id)
+            if len(toilet_category_records) == 1:
+                # おトイレカテゴリーが1つのときは、「ノーリアクション」に戻したいので
+                # 「ノーリアクション(id: 1)」に書き換える
+                update_toilet_category(toilet_record.id, 1)
             else:
-                await thread.send('リアクションするならどれか１つにしてくれでやんす\n'
-                                  f'とりあえず後につけられた方({reacted_emojis_in_db[-1]})で更新しておくでやんす')
-                reacted_category_id = read_category(emoji=reacted_emojis_in_db[-1]).id
+                # 削除されたemojiのtoilet_categoryレコードを削除
+                delete_toilet_category(toilet_record.id, category.id)
 
-            # category_idに変化なしなら更新しない
-            logger.info(f'reacted_category_id == toilet.category_id: {reacted_category_id == toilet.category_id}')
-            if reacted_category_id == toilet.category_id:
-                logger.info(f'No update required for the record(id: {toilet.id}).')
-                return
-            else:
-                id_before, id_after = update_toilet(reaction.message_id, reacted_category_id)
+            # 削除後のtoilet_categoryのレコードを取得してリプライ作成
+            updated_toilet_category_record = read_toilet_categories_by_tolet_id_all(toilet_record.id)
+            reply = category_update_reply(updated_toilet_category_record)
 
-            reply = category_update_reply(id_before, id_after, categories)
             await thread.send(reply)
 
 

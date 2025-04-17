@@ -3,7 +3,8 @@ from datetime import datetime
 from pathlib import Path
 
 from utils.config import ConfigManager
-from database.models import Toilet, Category
+from database.models import Toilet, Category, ToiletCategory
+from database.crud.category import read_category
 
 
 config = ConfigManager().config
@@ -65,14 +66,23 @@ def records_reply(period: str, start: datetime, end: datetime, records: list[Toi
     results = ''
     for record in records:
         # message_urlがあればリンクをつける
-        category_name = f'[{record.category.name}]({record.message_url}) {config.EMOJI_EXTERNAL_LINK}'\
-            if record.message_url else record.category.name
-        results += f'`{record.created_at.strftime('%Y/%m/%d %H:%M:%S')}:` {category_name}\n'
+        category_links = []
+        for cat in record.categories:
+            # name = f'[{cat.name}]({record.message_url})' if record.message_url else cat.name
+            category_links.append(cat.name)
 
-        if record.category.emoji is None:
-            continue
-        else:
-            total[record.category.emoji] += 1
+        # - リンクあり
+        # `2025/01/01 00:00:00: `[しーしー・うんち](https://hoge):external_link:
+        # - リンクなし
+        # `2025/01/01 00:00:00: `しーしー・うんち
+        category_name = f'[{'・'.join(category_links)}]({record.message_url}) {config.EMOJI_EXTERNAL_LINK}'\
+            if record.message_url else f'{'・'.join(category_links)}'
+        results += f'`{record.created_at.strftime("%Y/%m/%d %H:%M:%S")}:` {category_name}\n'
+
+        for cat in record.categories:
+            if cat.emoji is None:
+                continue
+            total[cat.emoji] += 1
 
     total_str = '    '.join([f'{key}`: {value}回`' for key, value in total.items() if value > 0])
 
@@ -99,15 +109,25 @@ def records_reply(period: str, start: datetime, end: datetime, records: list[Toi
     return reply
 
 
-def category_update_reply(id_before: int, id_after: int, categories: list[Category]) -> str:
-    logger.info(f'len(categories): {len(categories)}')
-    if id_before and id_after:
-        emoji_before = ''.join([cat.name for cat in categories if cat.id == id_before])
-        emoji_after = ''.join([cat.name for cat in categories if cat.id == id_after])
+def category_update_reply(toilet_categories: list[ToiletCategory] | None) -> str:
+    logger.debug(f'toilet_categories: {[t for t in toilet_categories]}')
 
-        return f'おトイレの種別が「{emoji_before}」から「{emoji_after}」に変更されたでやんす'
+    reply = 'おトイレの種別が'
+    if toilet_categories is None:
+        reply += 'うまいこと取得できなかったでやんす'
+    elif len(toilet_categories) == 1:
+        category = read_category(id=toilet_categories[0].category_id)
+        reply += f'「{category.name}」になったでやんす'
+    elif len(toilet_categories) > 1:
+        for i, record in enumerate(toilet_categories):
+            category = read_category(id=record.category_id)
+            reply += f'「{category.name}」' if i == 0 else f'と「{category.name}」'
+
+        reply += 'になったでやんす'
     else:
-        return 'おトイレの種別の変更に失敗したでやんす'
+        reply = 'おトイレの種別の変更に失敗したでやんす'
+
+    return reply
 
 
 def graph_reply(period: str, start: datetime, end: datetime) -> str:
