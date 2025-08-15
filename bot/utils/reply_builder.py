@@ -1,6 +1,7 @@
 from logging import getLogger
 from datetime import datetime
 from pathlib import Path
+import re
 
 from utils.config import ConfigManager
 from database.models import Toilet, Category, ToiletCategory
@@ -44,8 +45,11 @@ def registered_new_record_reply(new_record: Toilet, file_path: str) -> str:
 
 
 def parrot_reply(message: str) -> str:
-    return (message.translate(str.maketrans('?？', '！！'))
-            .replace('か', '').replace('なの', '').replace('でしょう', ''))
+    # 文末の「か」「なの」「でしょう」を削除
+    reply = re.sub(r'(か|なの|でしょう)([?？]?)$', '', message)
+    # 「?」や「？」を「！」に置き換え
+    reply = reply.translate(str.maketrans('?？', '！！'))
+    return reply
 
 
 def keywords_reply(keywords: list) -> str:
