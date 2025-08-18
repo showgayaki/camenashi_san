@@ -15,6 +15,12 @@ CREATE DATABASE IF NOT EXISTS camenashi DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_
 devのときは、`docker/camenashi_db/init.sql`  
 として保存しておくと、Docker起動時にデータベースが作成されます。
 
+## @Ubuntu
+```
+sudo apt update
+sudo apt install libmariadb-dev
+```
+
 ## envサンプル
 devのときは`env.dev`  
 prodのときは`env.prod`  
@@ -39,6 +45,7 @@ BACKUP_COMMAND="bash [path to]/backtan/run.sh --db camenashi"
 ```
 
 ## service登録
+`sudo vi /lib/systemd/system/camenashi_san.service`  
 ```
 [Unit]
 Description=Camenashi-san Discord Bot
@@ -55,6 +62,8 @@ Environment=DOTENV_FILE=[path to]/camenashi_san/.env
 [Install]
 WantedBy=multi-user.target
 ```
+`sudo systemctl enable camenashi_san.service`  
+`sudo systemctl start camenashi_san.service`  
 
 ## Docker(@dev)
 `docker compose --env-file .env.dev -f docker/compose.dev.yml up --build`  
