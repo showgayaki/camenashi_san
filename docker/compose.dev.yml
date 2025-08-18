@@ -1,28 +1,5 @@
 name: camenashi_san
 services:
-  camenashi_bot:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    env_file:
-      - ../.env.dev
-    image: camenashi_bot
-    container_name: camenashi_bot
-    hostname: camenashi_bot
-    volumes:
-      - type: bind
-        source: "../bot"
-        target: "/app/bot"
-      - type: bind
-        source: "../alembic"
-        target: "/app/alembic"
-    restart: always
-    networks:
-      - camenashi_network
-    depends_on:
-      camenashi_db:
-        condition: service_healthy
-    tty: true
   camenashi_db:
     build:
       context: ./camenashi_db/
@@ -38,21 +15,3 @@ services:
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASS}
       TZ: Asia/Tokyo
-    networks:
-      - camenashi_network
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      start_period: 10s
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-volumes:
-  socket:
-
-
-networks:
-  camenashi_network:
-    name: camenashi_network
-    driver: bridge
-    external: true

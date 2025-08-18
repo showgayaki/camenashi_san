@@ -2,6 +2,7 @@ from logging import getLogger
 import discord
 from discord.ext import commands
 
+from utils.backup import backup_db
 from utils.config import ConfigManager
 from utils.message_parser import zenkaku_to_int_days, start_datetime, end_datetime, extract_file_path
 from utils.reply_builder import registered_new_record_reply, parrot_reply, keywords_reply, records_reply
@@ -28,7 +29,7 @@ class OnMessage(commands.Cog):
         """
         # ログに出すのは1行目だけ
         message_content_first_row = f'{message.content.splitlines()[0]}...' if '\n' in message.content else message.content
-        logger.info(f"Message received: {{'id': {message.id}, 'type': {message.type}, 'message.author.name': {message.author.name}, 'message.content': {message_content_first_row}}}")
+        logger.info(f"Message received: {{'message.id': {message.id}, 'message.type': {message.type}, 'message.author.name': {message.author.name}, 'message.content': {message_content_first_row}}}")
         mention_ids = [mention.id for mention in message.mentions]
 
         # devのときは、かめなしチャンネルには反応しない
@@ -61,10 +62,18 @@ class OnMessage(commands.Cog):
                     category_ids=[1],
                 )
 
-                registered_message = registered_new_record_reply(new, file_path)
+                if new is None:
+                    logger.error(f'New Record insert failed: {message.jump_url}')
+                    reply = f'なんか新しいレコードが登録できなかったでやんす😇\n[これ]({message.jump_url})'
+                else:
+                    reply = registered_new_record_reply(new, file_path)
+                    # DBをバックアップ
+                    backup_result = backup_db()
+                    reply += f'\n{backup_result}'
+
                 admin_channel = self.bot.get_channel(config.DISCORD_ADMIN_CHANNEL_ID)
                 if admin_channel and isinstance(admin_channel, discord.TextChannel):
-                    await admin_channel.send(registered_message)
+                    await admin_channel.send(reply)
                 else:
                     logger.error('Admin channel is not a TextChannel or is None')
             else:
@@ -89,7 +98,8 @@ class OnMessage(commands.Cog):
                 # ユーザーからの質問なら元気にオウム返し
                 if not message.author.bot and\
                         (message.content.endswith('?') or message.content.endswith('？')):
-                    await message.channel.send(parrot_reply(message.content))
+                    reply = parrot_reply(message.content)
+                    await message.channel.send(reply)
                 else:  # Botの投稿なら無視
                     return
 

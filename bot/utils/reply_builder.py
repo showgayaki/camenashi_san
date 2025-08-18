@@ -45,10 +45,8 @@ def registered_new_record_reply(new_record: Toilet, file_path: str) -> str:
 
 
 def parrot_reply(message: str) -> str:
-    # 文末の「か」「なの」「でしょう」を削除
-    reply = re.sub(r'(か|なの|でしょう)([?？]?)$', '', message)
-    # 「?」や「？」を「！」に置き換え
-    reply = reply.translate(str.maketrans('?？', '！！'))
+    # 文末の「か[? | ？]」「なの[? | ？]」「でしょう[? | ？]」を`！`に変換
+    reply = re.sub(r'(か|なの|でしょう)([?？]?)$', '！', message)
     return reply
 
 
@@ -114,7 +112,13 @@ def records_reply(period: str, start: datetime, end: datetime, records: list[Toi
 
 
 def category_update_reply(toilet_categories: list[ToiletCategory] | None) -> str:
-    logger.debug(f'toilet_categories: {[t for t in toilet_categories]}')
+    logger.debug(
+        f'toilet_categories: {
+            [t for t in toilet_categories]
+            if toilet_categories is not None
+            else toilet_categories
+        }'
+    )
 
     reply = 'おトイレの種別が'
     if toilet_categories is None:

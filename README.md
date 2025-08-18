@@ -35,16 +35,28 @@ DB_PASS=  # DB_USERのパスワード
 DB_NAME=camenashi  # データーベース名
 
 EMOJI_EXTERNAL_LINK=  # リンク用の絵文字「\:external_link:」とポストするとIDを取れる
+BACKUP_COMMAND="bash [path to]/backtan/run.sh --db camenashi"
 ```
 
-## Docker実行
-@dev  
-`docker network create camenashi_network`(初回のみ)  
+## service登録
+```
+[Unit]
+Description=Camenashi-san Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+User=MyName
+WorkingDirectory=[path to]/camenashi_san
+ExecStart=[path to]/camenashi_san/start.sh
+Restart=always
+Environment=DOTENV_FILE=[path to]/camenashi_san/.env
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Docker(@dev)
 `docker compose --env-file .env.dev -f docker/compose.dev.yml up --build`  
 更新時  
 `docker compose --env-file .env.dev -f docker/compose.dev.yml down && docker compose --env-file .env.dev -f docker/compose.dev.yml up --build`
-
-@prod  
-`docker compose -f docker/compose.yml up -d --build`  
-更新時  
-`docker compose -f docker/compose.yml down && docker compose -f docker/compose.yml up -d --build`  

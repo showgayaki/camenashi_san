@@ -12,6 +12,7 @@ def extract_file_path(message: str) -> str:
     for line in message.splitlines():
         if line.endswith('.mp4'):
             return line
+    return ''
 
 
 def zenkaku_to_int_days(zenkaku_str: str):
@@ -65,7 +66,10 @@ def start_datetime(keyword: str) -> datetime:
         return datetime.combine(last_month.replace(day=1), time.min)
     elif config.KEYWORDS.days in keyword:
         days = zenkaku_to_int_days(keyword)
-        return datetime.combine(now - timedelta(days=days), time.min)
+        if isinstance(days, int):
+            return datetime.combine(now - timedelta(days=days), time.min)
+
+    return now
 
 
 def end_datetime(start: datetime, keyword: str) -> datetime:

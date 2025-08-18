@@ -43,10 +43,13 @@ class Config:
     DB_NAME: str
     KEYWORDS: Keywords
     EMOJI_EXTERNAL_LINK: str = ''
+    BACKUP_COMMAND: str = ''
 
 
 def load_config() -> Config:
-    load_dotenv(override=True)  # .envファイルの読み込み
+    # .envファイルの読み込み
+    dotenv_file = os.getenv("DOTENV_FILE", ".env.prod")
+    load_dotenv(dotenv_file, override=True)
 
     # durationの値を取得しつつ、キャスト
     raw_duration = int(os.getenv('AUTO_ARCHIVE_DURATION', 60))
@@ -69,4 +72,5 @@ def load_config() -> Config:
         DB_NAME=os.getenv('DB_NAME', 'database'),
         KEYWORDS=Keywords(),
         EMOJI_EXTERNAL_LINK=os.getenv('EMOJI_EXTERNAL_LINK', ''),
+        BACKUP_COMMAND=os.getenv('BACKUP_COMMAND', ''),
     )
