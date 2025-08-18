@@ -64,7 +64,7 @@ class OnMessage(commands.Cog):
 
                 if new is None:
                     logger.error(f'New Record insert failed: {message.jump_url}')
-                    reply = f'なんか新しいレコードが登録できなかったでやんす😇\n[これ]({message.jump_url})'
+                    reply = f'新しいおﾄｲﾚｺｰﾄﾞが登録できなかったでやんす😇\n[これ]({message.jump_url})'
                 else:
                     reply = registered_new_record_reply(new, file_path)
                     # DBをバックアップ

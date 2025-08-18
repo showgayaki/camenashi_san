@@ -27,7 +27,7 @@ def _period(period: str, start: datetime, end: datetime) -> str:
 
 
 def registered_new_record_reply(new_record: Toilet, file_path: str) -> str:
-    admin_message = f'新しいおトイレコード(ID: {new_record.id})が登録されました'
+    admin_message = f'Newおﾄｲﾚｺｰﾄﾞ(ID: {new_record.id})が登録されました'
     file_created_at = Path(file_path).name.split('_')[0]
     record_created_at = new_record.created_at.strftime('%Y%m%d-%H%M%S')
     logger.info(f'file_created_at: {file_created_at}, record_created_at: {record_created_at}')
